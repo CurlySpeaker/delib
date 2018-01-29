@@ -1,11 +1,12 @@
+from datetime import date
+
 from django.db import models
 from django.utils import timezone
-from decimal import Decimal
 
 
 class Documents(models.Model):
     title = models.CharField(max_length=50)
-    list_of_authors = models.CharField(max_length=50)
+    list_of_authors = models.ForeignKey('Authors',on_delete=models.CASCADE)
     list_of_keywords = models.CharField(max_length=50)
 
     check_out_time = models.DurationField()
@@ -29,16 +30,6 @@ class Books(Documents):
     year = models.DateField()
     is_a_bestseller = models.BooleanField()
     is_taken_by_a_faculty_member = models.BooleanField()
-
-"""
-    def set_check_out_time(self):
-        if str(self.copies.is_taken_by._meta) is "Faculty_member":
-            self.check_out_time = 4
-        elif self.is_a_bestseller:
-            self.check_out_time = 2
-        else:
-            self.check_out_time = 3
-"""
 
 
 class ReferenceBooksAndMagazines(Books):
@@ -69,6 +60,29 @@ class AudioVideo(Documents):
 
 
 class Copies(models.Model):
-    room = models.CharField
+    book = models.ForeignKey('Book',on_delete=models.CASCADE)
+    room = models.CharField(max_length=50)
     is_checked_out = models.BooleanField()
     checked_out_by = models.ForeignKey('User',on_delete=models.CASCADE)
+    due_back = models.DateField(null=True, blank=True)
+
+    LOAN_STATUS = (
+        ('c', 'Checked out'),
+        ('a', 'Available'),
+        ('r', 'Renewed'),
+    )
+
+    status = models.CharField(max_length=1, choices=LOAN_STATUS, blank=True, default='a', help_text='Book availability')
+
+    def is_overdue(self):
+        if self.due_back and date.today() > self.due_back:
+            return True
+        return False
+
+
+class Authors(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+
