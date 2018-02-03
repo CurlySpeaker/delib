@@ -70,7 +70,7 @@ def register(request):
             if User.objects.filter(pnum=pnum).exists():
                 form.add_error('pnum', "Phone number already in use")
             else:
-                user = User.objects.createp(pnum=pnum,password=password,name=name,surname=surname,address=address)
+                user = User.objects.create_user(pnum=pnum,password=password,name=name,surname=surname,address=address)
                 user.save()
                 return HttpResponseRedirect('/login/')
     else:

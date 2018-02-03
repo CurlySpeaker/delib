@@ -58,7 +58,7 @@ class User(AbstractBaseUser):
             self.password = sha256(self.pnum + raw_password)
 
     def check_password(self, raw_password):
-        return self.password == sha256(str(self.pnum) + str(raw_password))
+        return self.password == sha256(self.pnum + raw_password)
 
     def get_full_name(self):
         return '{0} {1}'.format(self.name, self.surname)
