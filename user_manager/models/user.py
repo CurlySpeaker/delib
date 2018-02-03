@@ -1,10 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
-from  hashlib import sha256
+from delib.hashes import sha256
 
 
 class UserManager(BaseUserManager):
+    use_in_migrations = True
 
     def create_user(self, pnum, password, **required_args):
         if not pnum or not password:
@@ -41,9 +42,10 @@ class User(AbstractBaseUser):
     is_staff = models.BooleanField(default=False)
     is_active = True
 
-    class Meta:
-        abstract = True
-
+    @classmethod
+    def create(cls,**kwargs):
+        user = cls(kwargs)
+        return user
 
     def has_perm(self, perm, obj=None):
         return self.is_superuser
@@ -56,7 +58,7 @@ class User(AbstractBaseUser):
             self.password = sha256(self.pnum + raw_password)
 
     def check_password(self, raw_password):
-        return self.password == sha256(self.pnum + raw_password)
+        return self.password == sha256(str(self.pnum) + str(raw_password))
 
     def get_full_name(self):
         return '{0} {1}'.format(self.name, self.surname)

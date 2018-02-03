@@ -11,14 +11,15 @@ from django.contrib.auth import (
 )
 
 
-from hashlib import sha256
+from delib.hashes import sha256
 
 from user_manager.models import User
 from .forms import (
     AuthorizationForm,
     RegistrationForm,
-    SubscribeForm,
 )
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 def redirect_if_authorized(function):
@@ -69,7 +70,7 @@ def register(request):
             if User.objects.filter(pnum=pnum).exists():
                 form.add_error('pnum', "Phone number already in use")
             else:
-                user = User.create_user(pnum,password,name=name,surname=surname,patronymics=patronymics,address=address)
+                user = User.objects.createp(pnum=pnum,password=password,name=name,surname=surname,address=address)
                 user.save()
                 return HttpResponseRedirect('/login/')
     else:

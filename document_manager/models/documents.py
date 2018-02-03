@@ -1,3 +1,4 @@
+'''
 from datetime import date
 from django.db import models
 from django.utils import timezone
@@ -5,7 +6,7 @@ from django.utils import timezone
 
 class Documents(models.Model):
     title = models.CharField(max_length=50)
-    list_of_authors = models.ManyToManyField('authors',on_delete=models.CASCADE)
+    list_of_authors = models.ManyToManyField('authors')
     list_of_keywords = models.CharField(max_length=50)
 
     check_out_period = models.CharField(max_length=1)
@@ -62,7 +63,6 @@ class Copies(models.Model):
     document = models.ForeignKey(Documents,on_delete=models.CASCADE)
     room = models.CharField(max_length=50)
     checked_out_by = models.ForeignKey('user',on_delete=models.CASCADE)
-    is_taken_by_a_faculty_member = models.BooleanField()
     due_back = models.DateField(null=True, blank=True)
 
     LOAN_STATUS = (
@@ -98,3 +98,4 @@ class Authors(models.Model):
     def __str__(self):
         return self.name
 
+'''
