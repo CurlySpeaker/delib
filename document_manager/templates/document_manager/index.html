@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Books</title>
+</head>
+<body>
+	{% csrf_token %}
+	{% for doc in docs %}
+		<p>{{ doc.id }}</p>
+		<br>
+		<p>{{ doc.title }}</p>
+		<hr>
+	{% endfor %}
+</body>
+</html>

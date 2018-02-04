@@ -1,19 +1,23 @@
-'''
 from datetime import date
 from django.db import models
 from django.utils import timezone
 
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
-class Documents(models.Model):
+from.author import Author
+
+class Document(models.Model):
     title = models.CharField(max_length=50)
-    list_of_authors = models.ManyToManyField('authors')
-    list_of_keywords = models.CharField(max_length=50)
-
+    authors = models.ManyToManyField(Author)
+    #TODO think about it
+    keywords = models.CharField(max_length=50)
     check_out_period = models.CharField(max_length=1)
     price = models.DecimalField(decimal_places=2,max_digits=6)
-    copies = models.ForeignKey('copies',on_delete=models.CASCADE)
-    number_of_copies = models.SmallIntegerField()
-    is_a_bestseller = models.BooleanField()
+    bestseller = models.BooleanField()
+
+    class Meta:
+        ordering = ['title']
 
     @property
     def number_of_copies(self):
@@ -23,31 +27,28 @@ class Documents(models.Model):
     def number_of_available_copies(self):
         return self.copies.objects.all().filter(LOAN_STATUS='Available').count()
 
-    class Meta:
-        abstract = True
-        ordering = ["title"]
+    def check_out(self,user):
+        copies = self.copies.objects.filter(status='Available')
+        if len(copies) > 0:
+            return copies[0].check_out(user)
+        else:
+            return False
 
     def __str__(self):
-        return "{0} - {1}".format(self.title,self.list_of_authors)
+        return '{0} - {1}'.format(self.title,self.authors)
 
 
-class Books(Documents):
+class Book(Document):
     publisher = models.CharField(max_length=50)
     edition = models.CharField(max_length=2)
     year = models.DateField()
 
 
-class ReferenceBooksAndMagazines(Books):
+class Reference(Book):
     pass
 
 
-class JournalArticles(models.Model):
-    title = models.CharField(max_length=50)
-    list_of_authors = models.ForeignKey('authors',on_delete=models.CASCADE)
-    journal = models.ForeignKey('journals',on_delete=models.CASCADE)  # many-to-one
-
-
-class Journals(Documents):
+class Journal(Document):
     # No authors here, list of authors will be empty
     publisher = models.CharField(max_length=50)
     issue = models.CharField(max_length=50)
@@ -55,15 +56,27 @@ class Journals(Documents):
     publication_date = models.DateTimeField(timezone.now())
 
 
-class AudioVideo(Documents):
+class JournalArticle(models.Model):
+    title = models.CharField(max_length=50)
+    authors = models.ManyToManyField(Author)
+    journal = models.ForeignKey(Journal,on_delete=models.CASCADE)  # many-to-one
+
+
+#Audio/Video
+class Media(Document):
     pass
 
 
-class Copies(models.Model):
-    document = models.ForeignKey(Documents,on_delete=models.CASCADE)
+'''
+document - document to wich copy belongs to
+room - position of copy
+loaner - by whom checked out
+'''
+class Copy(models.Model):
+    document = models.ForeignKey(Document,on_delete=models.CASCADE,related_name='copies')
     room = models.CharField(max_length=50)
-    checked_out_by = models.ForeignKey('user',on_delete=models.CASCADE)
-    due_back = models.DateField(null=True, blank=True)
+    loaner = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)
+    time_of_check_out = models.DateField(null=True, blank=True)
 
     LOAN_STATUS = (
         ('c', 'Checked out'),
@@ -71,13 +84,25 @@ class Copies(models.Model):
         ('r', 'Renewed'),
     )
 
-    status = models.CharField(max_length=1, choices=LOAN_STATUS, blank=True, default='a', help_text='Book availability')
+    status = models.CharField(max_length=1, choices=LOAN_STATUS, default='c', help_text='Book availability')
+
+    #Checking out book
+    def check_out(self,user):
+        if not self.is_available():
+            return False
+        self.loaner = user
+        self.status = 'c'
+        self.time_of_check_out = date.today()
+        return True
+
+    def is_available(self):
+        return self.status == 'a'
 
     def is_overdue(self):
         if date.today() > self.due_back:
             return True
         return False
-    
+''' 
     def set_check_out_period(self):
         if self.document is ReferenceBooksAndMagazines:
             self.check_out_period = 0
@@ -90,12 +115,7 @@ class Copies(models.Model):
         else:
             self.check_out_period = 3
         return self.check_out_period
-
-
-class Authors(models.Model):
-    name = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.name
-
 '''
+
+
+

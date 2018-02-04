@@ -13,7 +13,6 @@ from django.contrib.auth import (
 
 from delib.hashes import sha256
 
-from user_manager.models import User
 from .forms import (
     AuthorizationForm,
     RegistrationForm,
