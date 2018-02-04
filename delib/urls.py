@@ -20,8 +20,12 @@ from document_manager import views as doc_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
     path('login/', auth_view.login),
     path('register/', auth_view.register),
     path('logout/', auth_view.logout),	
-    path('docs/', doc_view.index)
+
+    path('docs/', doc_view.index),
+    path('docs/book/<int:id>', doc_view.book),
+    
     ]

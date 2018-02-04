@@ -24,7 +24,7 @@ User = get_user_model()
 def redirect_if_authorized(function):
     def wrapper(request, *args, **kwargs):
         if request.user.is_authenticated:
-            return HttpResponseRedirect('/account/')
+            return HttpResponseRedirect('/docs/')
         return function(request, *args, **kwargs)
     return wrapper
 
@@ -41,7 +41,7 @@ def login(request):
             )
             if user is not None:
                 django_login(request, user)
-                return HttpResponseRedirect('/')
+                return HttpResponseRedirect('/docs/')
             else:
                 form.add_error(None, "User doesn't exist")
     else:

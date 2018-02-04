@@ -1,14 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Login</title>
-</head>
-<body>
-  <form action="" method="post">
-    {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Send"></input>
-  </form>
-</body>
-</html>
+{% extends "authentication/entrance.html" %}
+
+{% block content %}
+<form class="aut" action="" method="post">
+  <p>Sign in</p>
+  {% csrf_token %}
+  {{ form }}
+  <input class="sub" type="submit" value="Send"></input>
+</form>
+{% endblock %}

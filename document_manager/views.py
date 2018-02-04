@@ -28,5 +28,14 @@ def index(request):
     return render(request, 'document_manager/index.html', {'docs': docs})
 
 @require_authorized
-def book(request):
-    pass
+def book(request, id):
+    user = User.objects.get(pk=request.user.id)
+    try:
+        doc = Document.objects.get(pk=id)
+    except:
+        return HttpResponse('No such book')
+    else:
+        if doc.check_out(user):
+            return HttpResponse('Success')
+        else:
+            return HttpResponse('No copies')

@@ -21,14 +21,14 @@ class Document(models.Model):
 
     @property
     def number_of_copies(self):
-        return self.copies.objects.all().count()
+        return self.copies.all().count()
 
     @property
-    def number_of_available_copies(self):
-        return self.copies.objects.all().filter(LOAN_STATUS='Available').count()
+    def available_copies(self):
+        return self.copies.filter(status='a')
 
     def check_out(self,user):
-        copies = self.copies.objects.filter(status='Available')
+        copies = self.available_copies
         if len(copies) > 0:
             return copies[0].check_out(user)
         else:
@@ -75,8 +75,8 @@ loaner - by whom checked out
 class Copy(models.Model):
     document = models.ForeignKey(Document,on_delete=models.CASCADE,related_name='copies')
     room = models.CharField(max_length=50)
-    loaner = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)
-    time_of_check_out = models.DateField(null=True, blank=True)
+    loaner = models.ForeignKey(User, on_delete=models.SET_NULL,null=True,blank=True)
+    booking_time = models.DateField(null=True, blank=True)
 
     LOAN_STATUS = (
         ('c', 'Checked out'),
@@ -92,7 +92,8 @@ class Copy(models.Model):
             return False
         self.loaner = user
         self.status = 'c'
-        self.time_of_check_out = date.today()
+        self.booking_time = date.today()
+        self.save()
         return True
 
     def is_available(self):
