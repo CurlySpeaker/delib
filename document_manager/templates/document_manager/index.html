@@ -17,8 +17,8 @@
               <div class="main_information">
                   <p class="im"><img class="user" src="{% static 'img/user.png'%}"></p>
                   <div class="information">
-                      <div class="inf name">A</div>
-                      <div class="inf">908909</div>
+                      <div class="inf name">{{ user.name }}</div>
+                      <div class="inf">{{ user.id }}</div>
                   </div>
               </div>
               <ul>
@@ -26,7 +26,7 @@
                   <li><a href="account.html">Account</a></li>
                   <li class="current"><a href="">Booking</a></li>
                   <li><a href="document.html">Checking out</a></li>
-                  <li><a href="">Logout</a></li>
+                  <li><a href="/logout">Logout</a></li>
               </ul>
           </div>
       </div>

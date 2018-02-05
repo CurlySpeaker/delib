@@ -24,8 +24,8 @@ def index(request):
     all_books = {}
     documents = Document.objects.all()
     docs = [{'id': doc.id, 'title': doc.title} for doc in documents]
-    print(docs)
-    return render(request, 'document_manager/index.html', {'docs': docs})
+    user = {'id':request.user.id, 'name':request.user.get_full_name()}
+    return render(request, 'document_manager/index.html', {'docs': docs, 'user': user})
 
 @require_authorized
 def book(request, id):
