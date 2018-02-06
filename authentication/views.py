@@ -20,6 +20,8 @@ from .forms import (
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
+from user_manager.models import Faculty, Student, Librarian
+
 
 def redirect_if_authorized(function):
     def wrapper(request, *args, **kwargs):
@@ -52,7 +54,7 @@ def login(request):
 
 def logout(request):
     django_logout(request)
-    return HttpResponseRedirect('/')
+    return HttpResponseRedirect('/login')
 
 
 @redirect_if_authorized
@@ -65,11 +67,21 @@ def register(request):
             name = form.cleaned_data['name']
             surname = form.cleaned_data['surname']
             address = form.cleaned_data['address']
-            
+            user_type = form.cleaned_data['user_type']
             if User.objects.filter(pnum=pnum).exists():
                 form.add_error('pnum', "Phone number already in use")
             else:
-                user = User.objects.create_user(pnum=pnum,password=password,name=name,surname=surname,address=address)
+                is_superuser = False
+                is_staff = False
+                if user_type == 'student':
+                    Model = Student
+                elif user_type == 'faculty':
+                    Model = Faculty
+                else:
+                    Model = Librarian
+                    is_superuser = True
+                    is_staff = True
+                user = Model.objects.create_user(pnum=pnum,password=password,name=name,surname=surname,address=address, is_staff=is_staff, is_superuser=is_superuser)
                 user.save()
                 return HttpResponseRedirect('/login/')
     else:
