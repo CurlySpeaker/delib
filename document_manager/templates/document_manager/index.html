@@ -1,11 +1,17 @@
 {% extends "document_manager/main.html" %}
 
+{% block title %}<!--Пользователь-->
+<div class="inf name">Aaa</div>
+<div class="inf">908909</div>
+{% endblock %}
+
 {% block content %}
 {% csrf_token %}
 {% for doc in docs %}
 <div class="row book">
     <div class="col-md-8">
         <div class="about_doc">
+            <!--Заголовок и авторы-->
             <a class="title" href="">{{ doc.title }}</a>
             <h3>Author(s): {{ doc.publisher}}</h3>
         </div>
@@ -13,11 +19,10 @@
 
     <div class="col-md-4">
         <div class="about_doc">
-            <h2 class="choose_button">Book</h2>/*здесь должен быть тип документа*/
+            <h2 class="choose_button">Book</h2> <!--Здесь должен быть тип документа*-->
         </div>
     </div>
 </div>
-<!--	<p class="col-md-6">{{ doc.id }}</p>  {{ item.blog.url }}   -->
 {% endfor %}
 
 {% endblock %}
