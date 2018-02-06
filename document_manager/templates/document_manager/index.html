@@ -1,55 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    {% load staticfiles %}
-    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}" type="text/css">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" >
-  </head>
-  <body>
-    <div class="win"></div>
-    <div class="container">
-  <div class="row">
-      <div class="col-md-3">
-          <div class="menu">
-              <div class="main_information">
-                  <p class="im"><img class="user" src="{% static 'img/user.png'%}"></p>
-                  <div class="information">
-                      <div class="inf name">{{ user.name }}</div>
-                      <div class="inf">{{ user.id }}</div>
-                  </div>
-              </div>
-              <ul>
+{% extends "document_manager/main.html" %}
 
-                  <li><a href="account.html">Account</a></li>
-                  <li class="current"><a href="">Booking</a></li>
-                  <li><a href="document.html">Checking out</a></li>
-                  <li><a href="/logout">Logout</a></li>
-              </ul>
-          </div>
-      </div>
+{% block title %}<!--Пользователь-->
+<div class="inf name">Aaa</div>
+<div class="inf">908909</div>
+{% endblock %}
 
-
-      <div class="col-md-9">
-          <div class="header"><p>BOOKS</p></div>
-          <div class="container">
-              <div class="row">
-								{% csrf_token %}
-								{% for doc in docs %}
-								<div class="row book">
-									<p class="col-md-6">{{ doc.title }}</p>
-									<br>
-									<p class="col-md-6">{{ doc.id }}</p>
-									<hr>
-								</div>
-								{% endfor %}
-          </div>
-      </div>
-  </div>
-</div>
-
+{% block content %}
+{% csrf_token %}
+{% for doc in docs %}
+<div class="row book">
+    <div class="col-md-8">
+        <div class="about_doc">
+            <!--Заголовок и авторы-->
+            <a class="title" href="">{{ doc.title }}</a>
+            <h3>Author(s): {{ doc.publisher}}</h3>
+        </div>
     </div>
-  </body>
-</html>
+
+    <div class="col-md-4">
+        <div class="about_doc">
+            <h2 class="choose_button">Book</h2> <!--Здесь должен быть тип документа*-->
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

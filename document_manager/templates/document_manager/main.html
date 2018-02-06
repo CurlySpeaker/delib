@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {% load staticfiles %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<div class="win"></div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="menu">
+                <div class="main_information">
+                    <p class="im"><img class="user" src="{% static 'img/user.png'%}"></p>
+                    <div class="information">
+
+                        {% block title %}
+                        {% endblock %}
+
+                    </div>
+                </div>
+                <ul>
+
+                    <li><a href="account.html">Account</a></li>
+                    <li class="current"><a href="">Booking</a></li>
+                    <li><a href="document.html">Checking out</a></li>
+                    <li><a href="">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="col-md-9">
+            <div class="header"><p>BOOKS</p></div>
+            <div class="container">
+                <div class="row">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
