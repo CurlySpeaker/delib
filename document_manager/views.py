@@ -23,8 +23,8 @@ def require_authorized(function):
 def index(request):
     all_books = {}
     documents = Document.objects.all()
-    docs = [{'id': doc.id, 'title': doc.title} for doc in documents]
-    user = {'id':request.user.id, 'name':request.user.get_full_name()}
+    user = {'id':request.user.id, 'name':request.user.get_full_name(), 'pnum':request.user.pnum}
+    docs = [{'id': doc.id, 'title': doc.title, 'authors': [author for author in doc.authors.all()]} for doc in documents]
     return render(request, 'document_manager/index.html', {'docs': docs, 'user': user})
 
 @require_authorized
