@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from django.db import models
 from django.utils import timezone
 
@@ -7,14 +7,20 @@ User = get_user_model()
 
 from.author import Author
 
+
+class Keyword(models.Model):
+    word = models.CharField(max_length=20)
+
+
 class Document(models.Model):
     title = models.CharField(max_length=50)
     authors = models.ManyToManyField(Author)
+    keywords = models.ManyToManyField(Keyword)
     #TODO think about it
-    keywords = models.CharField(max_length=50)
-    check_out_period = models.CharField(max_length=1)
-    price = models.DecimalField(decimal_places=2,max_digits=6)
-    bestseller = models.BooleanField()
+    def check_out_period():
+        pass
+
+    price = models.DecimalField(decimal_places=2, max_digits=6)
 
     class Meta:
         ordering = ['title']
@@ -27,7 +33,9 @@ class Document(models.Model):
     def available_copies(self):
         return self.copies.filter(status='a')
 
-    def check_out(self,user):
+    def check_out(self, user):
+        if len(self.copies.filter(loaner=user)) > 0:
+            return False
         copies = self.available_copies
         if len(copies) > 0:
             return copies[0].check_out(user)
@@ -35,31 +43,47 @@ class Document(models.Model):
             return False
 
     def __str__(self):
-        return '{0} - {1}'.format(self.title,self.authors)
+        return '{0} - {1}'.format(self.title, self.authors)
 
 
 class Book(Document):
     publisher = models.CharField(max_length=50)
     edition = models.CharField(max_length=2)
     year = models.DateField()
+    is_bestseller = models.BooleanField()
+    def check_out_period(user):
+        if isinstance(user, Faculty):
+            return 28
+        elif is_bestseller:
+            return 14:
+        else:
+            return 21
 
 
 class Reference(Book):
     pass
 
 
-class Journal(Document):
-    # No authors here, list of authors will be empty
+class Journal(models.Model):
     publisher = models.CharField(max_length=50)
-    issue = models.CharField(max_length=50)
-    editors = models.CharField(max_length=50)
+
+
+class Issue (Document):
+    journal = models.ForeignKey(Journal, on_delete=models.CASCADE, related_name='issues')
+    editors = models.ManyToManyField(Editors, on_delete = models.DO_NOTHING)
     publication_date = models.DateTimeField(timezone.now())
+    def check_out_period(user):
+        return 14
+    @property
+    def authors(): 
+        pass
+
 
 
 class JournalArticle(models.Model):
     title = models.CharField(max_length=50)
     authors = models.ManyToManyField(Author)
-    journal = models.ForeignKey(Journal,on_delete=models.CASCADE)  # many-to-one
+    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='journal_articles')  # many-to-one
 
 
 #Audio/Video
@@ -73,11 +97,10 @@ room - position of copy
 loaner - by whom checked out
 '''
 class Copy(models.Model):
-    document = models.ForeignKey(Document,on_delete=models.CASCADE,related_name='copies')
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='copies')
     room = models.CharField(max_length=50)
-    loaner = models.ForeignKey(User, on_delete=models.SET_NULL,null=True,blank=True)
+    loaner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     booking_time = models.DateField(null=True, blank=True)
-
     LOAN_STATUS = (
         ('c', 'Checked out'),
         ('a', 'Available'),
@@ -87,7 +110,7 @@ class Copy(models.Model):
     status = models.CharField(max_length=1, choices=LOAN_STATUS, default='c', help_text='Book availability')
 
     #Checking out book
-    def check_out(self,user):
+    def check_out(self, user):
         if not self.is_available():
             return False
         self.loaner = user
@@ -100,23 +123,6 @@ class Copy(models.Model):
         return self.status == 'a'
 
     def is_overdue(self):
-        if date.today() > self.due_back:
+        if (date.today() - self.booking_time()).day() > self.document.check_out_period(self.loaner):
             return True
         return False
-''' 
-    def set_check_out_period(self):
-        if self.document is ReferenceBooksAndMagazines:
-            self.check_out_period = 0
-        elif self.document is AudioVideo or Journals:
-            self.check_out_period = 2
-        elif self.is_taken_by_a_faculty_member:
-            self.check_out_period = 4
-        elif self.document is Books and self.document.is_a_bestseller is True:
-            self.check_out_period = 2
-        else:
-            self.check_out_period = 3
-        return self.check_out_period
-'''
-
-
-
