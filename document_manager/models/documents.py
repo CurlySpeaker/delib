@@ -5,8 +5,17 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-from.author import Author
+from user_manager.models import *
 
+from.author import Author, Editor
+from document_manager.functions import get_real_document
+
+DOC_TYPES = (
+    ('bok', 'book'),
+    ('ref', 'reference'),
+    ('iss', 'issue'),
+    ('med', 'media'),
+    )
 
 class Keyword(models.Model):
     word = models.CharField(max_length=20)
@@ -16,11 +25,9 @@ class Document(models.Model):
     title = models.CharField(max_length=50)
     authors = models.ManyToManyField(Author)
     keywords = models.ManyToManyField(Keyword)
-    #TODO think about it
-    def check_out_period():
-        pass
-
     price = models.DecimalField(decimal_places=2, max_digits=6)
+    doc_type = models.CharField(max_length=3, choices = DOC_TYPES)
+
 
     class Meta:
         ordering = ['title']
@@ -42,6 +49,10 @@ class Document(models.Model):
         else:
             return False
 
+    def check_out_period(self,user):
+        doc = get_real_document(self)
+        doc.check_out_period(user)
+
     def __str__(self):
         return '{0} - {1}'.format(self.title, self.authors)
 
@@ -50,12 +61,13 @@ class Book(Document):
     publisher = models.CharField(max_length=50)
     edition = models.CharField(max_length=2)
     year = models.DateField()
-    is_bestseller = models.BooleanField()
-    def check_out_period(user):
+    is_bestseller = models.BooleanField(default=False)
+
+    def check_out_period(self,user):
         if isinstance(user, Faculty):
             return 28
-        elif is_bestseller:
-            return 14:
+        elif self.is_bestseller:
+            return 14
         else:
             return 21
 
@@ -70,12 +82,12 @@ class Journal(models.Model):
 
 class Issue (Document):
     journal = models.ForeignKey(Journal, on_delete=models.CASCADE, related_name='issues')
-    editors = models.ManyToManyField(Editors, on_delete = models.DO_NOTHING)
+    editors = models.ManyToManyField(Editor)
     publication_date = models.DateTimeField(timezone.now())
-    def check_out_period(user):
+    def check_out_period(self,user):
         return 14
     @property
-    def authors(): 
+    def authors(self): 
         pass
 
 
@@ -98,7 +110,7 @@ loaner - by whom checked out
 '''
 class Copy(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='copies')
-    room = models.CharField(max_length=50)
+    room = models.CharField(max_length=50, blank=True)
     loaner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     booking_time = models.DateField(null=True, blank=True)
     LOAN_STATUS = (
@@ -107,11 +119,13 @@ class Copy(models.Model):
         ('r', 'Renewed'),
     )
 
-    status = models.CharField(max_length=1, choices=LOAN_STATUS, default='c', help_text='Book availability')
+    status = models.CharField(max_length=1, choices=LOAN_STATUS, default='a', help_text='Book availability')
 
     #Checking out book
     def check_out(self, user):
         if not self.is_available():
+            return False
+        if self.document.doc_type == 'ref':
             return False
         self.loaner = user
         self.status = 'c'

@@ -38,4 +38,4 @@ def book(request, id):
         if doc.check_out(user):
             return HttpResponse('Success')
         else:
-            return HttpResponse('No copies')
+            return HttpResponse('No copies or you have one')

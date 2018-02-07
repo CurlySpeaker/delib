@@ -17,10 +17,9 @@ from .forms import (
     AuthorizationForm,
     RegistrationForm,
 )
-from django.contrib.auth import get_user_model
-User = get_user_model()
 
-from user_manager.models import Faculty, Student, Librarian
+from user_manager.models import User, Faculty, Student, Librarian, ROLES
+from user_manager.functions import get_real_user
 
 
 def redirect_if_authorized(function):
@@ -42,6 +41,7 @@ def login(request):
                 password=form.cleaned_data['password']
             )
             if user is not None:
+                user = get_real_user(user)
                 django_login(request, user)
                 return HttpResponseRedirect('/docs/')
             else:
@@ -75,13 +75,16 @@ def register(request):
                 is_staff = False
                 if user_type == 'student':
                     Model = Student
+                    user_type = 'stu'
                 elif user_type == 'faculty':
                     Model = Faculty
+                    user_type = 'fac'
                 else:
+                    user_type = 'lib'
                     Model = Librarian
                     is_superuser = True
                     is_staff = True
-                user = Model.objects.create_user(pnum=pnum,password=password,name=name,surname=surname,address=address, is_staff=is_staff, is_superuser=is_superuser)
+                user = Model.objects.create_user(pnum=pnum,password=password,name=name,surname=surname,address=address, is_staff=is_staff, is_superuser=is_superuser, user_type=user_type)
                 user.save()
                 return HttpResponseRedirect('/login/')
     else:

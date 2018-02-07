@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 from delib.hashes import sha256
 
+from .roles import ROLES
+
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -25,11 +27,13 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
+
     name = models.CharField(max_length=30)
     surname = models.CharField(max_length=30)
     address = models.CharField(max_length=30)
     pnum = models.CharField(unique=True, max_length=11)
     password = models.CharField(max_length=128)
+    user_type = models.CharField(max_length=3, choices=ROLES)
 
     # Methods and fields for enabling authentication on this model
 
