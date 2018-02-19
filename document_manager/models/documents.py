@@ -44,7 +44,7 @@ class Document(PolymorphicModel):
             return False
 
     def check_out_period(self,user):
-        self.check_out_period(user)
+        pass
 
     def __str__(self):
         return '{0} - {1}'.format(self.title, self.authors)
@@ -77,8 +77,10 @@ class Issue (Document):
     journal = models.ForeignKey(Journal, on_delete=models.CASCADE, related_name='issues')
     editors = models.ManyToManyField(Editor)
     publication_date = models.DateTimeField(timezone.now())
+
     def check_out_period(self,user):
         return 14
+        
     @property
     def authors(self): 
         pass
