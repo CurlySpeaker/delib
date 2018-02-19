@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 from django.db import models
 from django.utils import timezone
+from polymorphic.models import PolymorphicModel
 
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -10,23 +11,16 @@ from user_manager.models import *
 from.author import Author, Editor
 from document_manager.functions import get_real_document
 
-DOC_TYPES = (
-    ('bok', 'book'),
-    ('ref', 'reference'),
-    ('iss', 'issue'),
-    ('med', 'media'),
-    )
 
 class Keyword(models.Model):
     word = models.CharField(max_length=20)
 
 
-class Document(models.Model):
+class Document(PolymorphicModel):
     title = models.CharField(max_length=50)
     authors = models.ManyToManyField(Author)
     keywords = models.ManyToManyField(Keyword)
     price = models.DecimalField(decimal_places=2, max_digits=6)
-    doc_type = models.CharField(max_length=3, choices = DOC_TYPES)
 
 
     class Meta:
@@ -50,8 +44,7 @@ class Document(models.Model):
             return False
 
     def check_out_period(self,user):
-        doc = get_real_document(self)
-        doc.check_out_period(user)
+        self.check_out_period(user)
 
     def __str__(self):
         return '{0} - {1}'.format(self.title, self.authors)
@@ -125,7 +118,7 @@ class Copy(models.Model):
     def check_out(self, user):
         if not self.is_available():
             return False
-        if self.document.doc_type == 'ref':
+        if isinstance(self.document,Reference):
             return False
         self.loaner = user
         self.status = 'c'
