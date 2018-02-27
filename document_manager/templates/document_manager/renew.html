@@ -1,0 +1,49 @@
+{% extends "document_manager/main.html" %}
+
+{% block tit%}
+<title>Renew</title>
+{% endblock%}
+
+{% block title %}<!--Пользователь-->
+{% csrf_token %}
+<div class="inf name">{{user.name}}</div>
+<div class="inf">{{user.pnum}}</div>
+{% endblock %}
+
+{% block menu %}<!--Пользователь-->
+{% csrf_token %}
+<li><a href="../information/">Account</a></li>
+<li><a href="../docs/">Booking</a></li>
+<li class="current" ><a href="">Checking out</a></li>
+<li><a href="../logout/">Logout</a></li>
+{% endblock %}
+
+
+{% block head %}
+<div class="header"><p>CHECKING OUT</p></div>
+{% endblock %}
+
+
+{% block content %}
+{% csrf_token %}
+{% for doc in docs %}
+<div class="row book">
+    <div class="col-md-12">
+        <div class="about_doc">
+            <!--Заголовок и авторы-->
+            <a class="title" href="">{{ doc.title }}</a>
+            <h3>Author(s):
+                {% for author in doc.authors %}
+                <!--Печатает всех авторов-->
+                {{author}},
+                {% endfor %}
+            </h3>
+            <h3>Checking out period: {{doc.date}}</h3>
+        </div>
+        <!-- ссылка на renew-->
+        <a href="" class="choose_button">Renew</a>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

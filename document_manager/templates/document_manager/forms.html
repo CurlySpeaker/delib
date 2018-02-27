@@ -1,0 +1,34 @@
+{% extends "document_manager/main.html" %}
+
+{% block tit%}
+{% endblock%}
+
+{% block title %}<!--Пользователь-->
+{% csrf_token %}
+<div class="inf name">{{user.name}}</div>
+<div class="inf">{{user.pnum}}</div>
+{% endblock %}
+
+{% block menu %}<!--Пользователь-->
+{% csrf_token %}
+<li class="current"><a href="../information/">Account</a></li>
+<li><a href="../docs/">Booking</a></li>
+<li><a href="../renew">Checking out</a></li>
+<li><a href="../logout/">Logout</a></li>
+{% endblock %}
+
+
+{% block head %}
+<div class="header"><p>CHECKING OUT</p></div>
+{% endblock %}
+
+
+{% block content %}
+<div class="row book add_patron">
+<form class="col-md-12" action="" method="post">
+     {% block forms %}
+    {% endblock %}
+</form>
+</div>
+
+{% endblock %}
