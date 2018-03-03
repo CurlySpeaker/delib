@@ -1,4 +1,5 @@
-from datetime import date, timedelta
+from user_manager.models import *
+
 from django.db import models
 from django.utils import timezone
 from polymorphic.models import PolymorphicModel
@@ -6,10 +7,7 @@ from polymorphic.models import PolymorphicModel
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-from user_manager.models import *
-
 from.author import Author, Editor
-from document_manager.functions import get_real_document
 
 
 class Keyword(models.Model):
@@ -21,7 +19,6 @@ class Document(PolymorphicModel):
     authors = models.ManyToManyField(Author)
     keywords = models.ManyToManyField(Keyword)
     price = models.DecimalField(decimal_places=2, max_digits=6)
-
 
     class Meta:
         ordering = ['title']
@@ -43,11 +40,29 @@ class Document(PolymorphicModel):
         else:
             return False
 
-    def check_out_period(self,user):
+    def check_out_period(self, user):
         pass
 
+    @classmethod
+    def add_doc(cls, user, **kwargs):
+        cls.objects.create(**kwargs)
+
+    def modify_doc(self, user):
+        if isinstance(user, Librarian):
+            self.update(**kwargs)
+
+    def remove_doc(self, user):
+        if isinstance(user, Librarian):
+            self.delete()
+
+    def return_doc(self, user):
+        if len(self.copies.filter(loaner=user)) <= 0:
+            return False
+        copy = self.copies.filter(loaner=user)[0]
+        return copy.return_copy()
+
     def __str__(self):
-        return '{0} - {1}'.format(self.title, self.authors)
+        return '{0}'.format(self.title)
 
 
 class Book(Document):
@@ -56,7 +71,7 @@ class Book(Document):
     year = models.DateField()
     is_bestseller = models.BooleanField(default=False)
 
-    def check_out_period(self,user):
+    def check_out_period(self, user):
         if isinstance(user, Faculty):
             return 28
         elif self.is_bestseller:
@@ -74,26 +89,28 @@ class Journal(models.Model):
 
 
 class Issue (Document):
-    journal = models.ForeignKey(Journal, on_delete=models.CASCADE, related_name='issues')
+    journal = models.ForeignKey(
+        Journal, on_delete=models.CASCADE, related_name='issues')
     editors = models.ManyToManyField(Editor)
     publication_date = models.DateTimeField(timezone.now())
 
-    def check_out_period(self,user):
+    def check_out_period(self, user):
         return 14
-        
-    @property
-    def authors(self): 
-        pass
 
+    @property
+    def authors(self):
+        pass
 
 
 class JournalArticle(models.Model):
     title = models.CharField(max_length=50)
     authors = models.ManyToManyField(Author)
-    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='journal_articles')  # many-to-one
+    issue = models.ForeignKey(
+        Issue, on_delete=models.CASCADE,
+        related_name='journal_articles')  # many-to-one
 
 
-#Audio/Video
+# Audio/Video
 class Media(Document):
     pass
 
@@ -103,10 +120,14 @@ document - document to wich copy belongs to
 room - position of copy
 loaner - by whom checked out
 '''
+
+
 class Copy(models.Model):
-    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='copies')
+    document = models.ForeignKey(
+        Document, on_delete=models.CASCADE, related_name='copies')
     room = models.CharField(max_length=50, blank=True)
-    loaner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    loaner = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True)
     booking_time = models.DateField(null=True, blank=True)
     LOAN_STATUS = (
         ('c', 'Checked out'),
@@ -114,13 +135,15 @@ class Copy(models.Model):
         ('r', 'Renewed'),
     )
 
-    status = models.CharField(max_length=1, choices=LOAN_STATUS, default='a', help_text='Book availability')
+    status = models.CharField(
+        max_length=1, choices=LOAN_STATUS,
+        default='a', help_text='Book availability')
 
-    #Checking out book
+    # Checking out book
     def check_out(self, user):
         if not self.is_available():
             return False
-        if isinstance(self.document,Reference):
+        if isinstance(self.document, Reference):
             return False
         self.loaner = user
         self.status = 'c'
@@ -132,6 +155,17 @@ class Copy(models.Model):
         return self.status == 'a'
 
     def is_overdue(self):
-        if (date.today() - self.booking_time()).day() > self.document.check_out_period(self.loaner):
+        if (date.today() - self.booking_time()).day() \
+           > self.document.check_out_period(self.loaner):
             return True
         return False
+
+    def return_copy(self):
+        self.__dict__ = {
+            **self.__dict__,
+            'status': 'a',
+            'booking_time': None,
+            'loaner': None,
+        }
+        self.save()
+        return True

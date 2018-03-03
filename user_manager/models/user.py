@@ -48,7 +48,7 @@ class User(AbstractBaseUser):
 
     @classmethod
     def create(cls,**kwargs):
-        user = cls(kwargs)
+        user = cls(**kwargs)
         return user
 
     def has_perm(self, perm, obj=None):
@@ -76,7 +76,6 @@ class Patron(User):
     abstract = True
 
 
-
 class Faculty(Patron):
     pass
 
@@ -86,4 +85,14 @@ class Student(Patron):
 
 
 class Librarian(User):
-    pass
+
+    @classmethod
+    def add_user(cls, **kwargs):
+        cls.objects.create_user(**kwargs)
+
+    def delete_user(self, user):
+        user.delete()
+
+    def modify_user(self, user, **kwargs):
+        user.update(**kwargs)
+
