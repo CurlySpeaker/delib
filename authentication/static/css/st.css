@@ -1,0 +1,49 @@
+
+.book li{
+
+    list-style-type: none;
+    width: 100%;
+    text-decoration: none;
+    vertical-align: middle;
+    margin: 5px;
+    padding: 0;
+    color: #808080;
+    font-size: 15px;
+}
+
+
+.book ul{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+font-size: 25px;
+    color: #4a4a4a;
+}
+
+.searchi{
+   margin: 0;
+}
+
+.search{
+    background-color: white;
+    height: 40px;
+    border-radius: 5px;
+    border: rgba(0,0,0,0.2) solid 1px;
+    vertical-align: middle;
+    color: black;
+}
+
+.sub{
+     background-image: url(../img/search.png);
+    background-color: white;
+    margin-top: auto;
+    background-size: cover;
+    border: none;
+    float: right;
+    margin-top: 0;
+    height: 30px;
+    width: 30px;
+}

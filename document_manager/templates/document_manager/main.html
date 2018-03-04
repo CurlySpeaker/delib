@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     {% load staticfiles %}
+    {% block tit%}
+    {% endblock%}
     <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'css/st.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
@@ -24,18 +27,16 @@
                     </div>
                 </div>
                 <ul>
-
-                    <li><a href="account.html">Account</a></li>
-                    <li class="current"><a href="">Booking</a></li>
-                    <li><a href="document.html">Checking out</a></li>
-                    <li><a href="">Logout</a></li>
+                    {% block menu %}
+                    {% endblock %}
                 </ul>
             </div>
         </div>
 
 
         <div class="col-md-9">
-            <div class="header"><p>BOOKS</p></div>
+          {% block head %}
+          {% endblock %}
             <div class="container">
                 <div class="row">
                     {% block content %}

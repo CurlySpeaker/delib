@@ -1,10 +1,13 @@
 {% extends "authentication/entrance.html" %}
+{% block title %}<!--Пользователь-->
+<title>Sign In</title>
+{% endblock %}
 
 {% block content %}
 <form class="aut" action="" method="post">
-  <p>Sign in</p>
-  {% csrf_token %}
-  {{ form }}
-  <input class="sub" type="submit" value="Send"></input>
+    <p>Sign in</p>
+    {% csrf_token %}
+    {{ form }}
+    <input class="sub" type="submit" value="Send"></input>
 </form>
 {% endblock %}

@@ -1,0 +1,116 @@
+{% extends "document_manager/main.html" %}
+
+{% block tit%}
+<title>Account</title>
+{% endblock%}
+
+{% block title %}<!--Пользователь-->
+{% csrf_token %}
+<div class="inf name">{{user.name}}</div>
+<div class="inf">{{user.pnum}}</div>
+{% endblock %}
+
+{% block menu %}<!--Пользователь-->
+{% csrf_token %}
+<li class="current"><a href="">Account</a></li>
+<li><a href="../docs/">Booking</a></li>
+<li ><a href="../renew/">Checking out</a></li>
+<li><a href="../logout/">Logout</a></li>
+{% endblock %}
+
+{% block head %}
+<div class="header"><p>ACCOUNT</p></div>
+{% endblock %}
+
+{% block content %}
+<div class="row book">
+    <div class="col-md-6">
+        <h1 class="fines">Fines</h1>
+    </div>
+    <div class="col-md-6">
+        <table class="post_type_fine">
+
+            <tr>
+                <td>Go to Statement Considered Harmful</td>
+                <td>10</td>
+            </tr>
+            <tr>
+                <td>Go to Statement Considered Harmful</td>
+                <td>15</td>
+            </tr>
+        </table>
+
+    </div>
+</div>
+
+<div class="row book">
+    <div class="col-md-12">
+        <h1>Account</h1>
+    </div>
+    <div class="col-md-12">
+        <ul>
+            <li><p>Username: {{user.name}}</p></li>
+            <li><p>Address: {{user.surname}}</p></li>
+            <li><p>Card number:{{user.pnum}}</p></li>
+            <li><p>Card number:{{user.address}}</p></li>
+            <li><p>User type: {{user.type}}</p></li>
+        </ul>
+
+    </div>
+</div>
+<!--
+Можно проверить, пользователь - librarian или patron?
+<div class="row book">
+    <div class="col-md-6">
+    <h1>Patrons <a href="../add/" class="black_button">+</a></h1>
+    </div>
+    <div class="col-md-6">
+    <h1>Document <a href="../add_doc/" class="black_button">+</a></h1>
+    </div>
+</div>
+
+<div class="row book">
+    <div class="col-md-6">
+        <h2 class="">Students</h2>
+        <table class="list_of_patrons">
+            <tr>
+                <td>Tlklkdfd</td>
+                <td>78676564545</td>
+                <td><a class="choose_button" href="modify.html">modify</a></td>
+                <td><a class="choose_button" a href="">delete</a></td>
+            </tr>
+              <tr>
+                 {% for us in users %}
+                  <td>{{us.name}}</td>
+                  <td>{{us.pnum}}</td>
+                  <td class="choose_button"><a href="modify.html">modify</a></td>
+                  <td class=choose_button"><a href="">delete</a></td>
+                  {% endfor %}
+              </tr>
+
+        </table>
+    </div>
+    <div class="col-md-6">
+         <h2 class="">Faculties</h2>
+        <table class="list_of_patrons">
+            <tr>
+                <td>Tlklkdfd</td>
+                <td>78676564545</td>
+                <td><a class="choose_button" href="modify.html">modify</a></td>
+                <td><a class="choose_button" a href="">delete</a></td>
+            </tr>
+            <!--  <tr>
+                 {% for us in users %}
+                  <td>{{us.name}}</td>
+                  <td>{{us.pnum}}</td>
+                  <td class="choose_button"><a href="modify.html">modify</a></td>
+                  <td class=choose_button"><a href="">delete</a></td>
+                  {% endfor %}
+              </tr>-->
+<!--
+        </table>
+
+    </div>
+</div>-->
+
+{% endblock %}

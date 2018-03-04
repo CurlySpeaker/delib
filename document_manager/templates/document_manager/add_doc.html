@@ -1,0 +1,12 @@
+{% extends "document_manager/forms.html" %}
+
+{% block tit%}
+<title>Add document</title>
+{% endblock%}
+
+{% block forms %}
+<h2>Add document</h2>
+{% csrf_token %}
+{{ form }}
+<input class="submit" type="submit" value="Add"></input>
+{% endblock %}
