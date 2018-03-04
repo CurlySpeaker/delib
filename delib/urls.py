@@ -19,13 +19,15 @@ from authentication import views as auth_view
 from document_manager import views as doc_view
 
 urlpatterns = [
+    path('', doc_view.index),
     path('admin/', admin.site.urls),
 
     path('login/', auth_view.login),
     path('register/', auth_view.register),
-    path('logout/', auth_view.logout),	
+    path('logout.', auth_view.logout),
 
     path('docs/', doc_view.index),
+    path('docs/my_books/', doc_view.my_books),
     path('docs/book/<int:id>', doc_view.book),
-    
-    ]
+    path('docs/return_doc/<int:id>', doc_view.return_doc),
+]

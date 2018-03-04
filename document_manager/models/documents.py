@@ -1,4 +1,5 @@
 from user_manager.models import *
+from datetime import date
 
 from django.db import models
 from django.utils import timezone
@@ -161,11 +162,8 @@ class Copy(models.Model):
         return False
 
     def return_copy(self):
-        self.__dict__ = {
-            **self.__dict__,
-            'status': 'a',
-            'booking_time': None,
-            'loaner': None,
-        }
+        self.status = 'a'
+        self.booking_time = None
+        self.loaner = None
         self.save()
         return True

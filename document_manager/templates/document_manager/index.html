@@ -14,7 +14,7 @@
 {% csrf_token %}
 <li><a href="../information/">Account</a></li>
 <li class="current"><a href="">Booking</a></li>
-<li><a href="../renew/">Checking out</a></li>
+<li><a href="../docs/my_books/">Checking out</a></li>
 <li><a href="../logout/">Logout</a></li>
 {% endblock %}
 
@@ -24,45 +24,47 @@
 
 {% block content %}
 
+<!--
 <div class="row book1">
-    <div class="col-md-12">
-<form class="form-inline">
-  <div class="form-group">
-    <input class="search" type="search" name="findOut" placeholder="Search">
+  <div class="col-md-12">
+    <form class="form-inline">
+      <div class="form-group">
+        <input class="search" type="search" name="findOut" placeholder="Search">
+      </div>
+      <label class="form-check-inline">
+        <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1"> Authors
+      </label>
+      <label class="form-check-inline">
+        <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2"> Topics
+      </label>
+      <label class="form-check-inline">
+        <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3"> Keywords
+      </label>
+      <label class="form-check-inline">
+        <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3"> Problem
+      </label>
+      <input class="sub" type="submit" value="">
+    </form>
   </div>
-    <label class="form-check-inline">
-  <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1"> Authors
-</label>
-<label class="form-check-inline">
-  <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2"> Topics
-</label>
-<label class="form-check-inline">
-  <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3"> Keywords
-</label>
-    <label class="form-check-inline">
-  <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3"> Problem
-</label>
-   <input class="sub" type="submit" value="">
-</form>
-    </div>
 </div>
+-->
 
 {% csrf_token %}
 {% for doc in docs %}
 <div class="row book">
-    <div class="col-md-12">
-        <div class="about_doc">
-            <!--Заголовок и авторы-->
-            <a class="title" href="">{{ doc.title }}</a>
-            <h3>Author(s):
-                {% for author in doc.authors %}
-                <!--Печатает всех авторов-->
-                {{author}},
-                {% endfor %}
-            </h3>
-        </div>
-        <a href="/docs/book/{{doc.id}}" class="choose_button">Book</a>
+  <div class="col-md-12">
+    <div class="about_doc">
+      <!--Заголовок и авторы-->
+      <a class="title" href="">{{ doc.title }}</a>
+      <h3>Author(s):
+        {% for author in doc.authors %}
+        <!--Печатает всех авторов-->
+        {{author}},
+        {% endfor %}
+      </h3>
     </div>
+    <a href="/docs/book/{{doc.id}}" class="choose_button">Book</a>
+  </div>
 </div>
 <!--
 Можно проверить, пользователь - librarian или patron?

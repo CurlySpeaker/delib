@@ -14,7 +14,7 @@
 {% csrf_token %}
 <li class="current"><a href="">Account</a></li>
 <li><a href="../docs/">Booking</a></li>
-<li ><a href="../renew/">Checking out</a></li>
+<li ><a href="../docs/my_books">Checking out</a></li>
 <li><a href="../logout/">Logout</a></li>
 {% endblock %}
 
@@ -29,7 +29,6 @@
     </div>
     <div class="col-md-6">
         <table class="post_type_fine">
-
             <tr>
                 <td>Go to Statement Considered Harmful</td>
                 <td>10</td>
@@ -39,7 +38,6 @@
                 <td>15</td>
             </tr>
         </table>
-
     </div>
 </div>
 
@@ -55,7 +53,6 @@
             <li><p>Card number:{{user.address}}</p></li>
             <li><p>User type: {{user.type}}</p></li>
         </ul>
-
     </div>
 </div>
 <!--
