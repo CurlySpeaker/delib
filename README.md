@@ -12,9 +12,7 @@
 	<li>Anastasia Pichka</li>
 	<li>Susanna Gimaeva</li>
 	</ul>
-
 	<h3>Documentation file - documentation.pdf</h3>
-
 	<h3>How to run:</h3>
 	git clone https://github.com/CurlySpeaker/delib
 	pip install -r req.txt
@@ -22,15 +20,10 @@
 	python manage.py migrate
 	python manage.py runserver
 	Then local server will be started on localhost:8000
-
 	<h3>How to run using shell:</h3>
-
 	python manage.py shell
-
 	<h3>How to create superuser:</h3>
-
 	python manage.py createsuperuser
-
 </body>
 </html>
 
