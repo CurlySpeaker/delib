@@ -1,8 +1,7 @@
 from django.shortcuts import render
+from django.urls import reverse
 from django.http import (
     HttpResponseRedirect,
-    HttpResponse,
-    Http404,
 )
 from django.contrib.auth import (
     authenticate as django_authenticate,
@@ -11,28 +10,26 @@ from django.contrib.auth import (
 )
 
 
-from delib.hashes import sha256
-
 from .forms import (
     AuthorizationForm,
     RegistrationForm,
 )
 
-from user_manager.models import User, Faculty, Student, Librarian, ROLES
+from user_manager.models import User, Faculty, Student, Librarian
 from user_manager.functions import get_real_user
 
 
 def redirect_if_authorized(function):
     def wrapper(request, *args, **kwargs):
         if request.user.is_authenticated:
-            return HttpResponseRedirect('/docs/')
+            return HttpResponseRedirect(reverse('home'))
         return function(request, *args, **kwargs)
     return wrapper
 
 
 @redirect_if_authorized
 def login(request):
-    if request.method == 'POST':  
+    if request.method == 'POST':
         form = AuthorizationForm(request.POST)
         if form.is_valid():
             user = django_authenticate(
@@ -43,7 +40,7 @@ def login(request):
             if user is not None:
                 user = get_real_user(user)
                 django_login(request, user)
-                return HttpResponseRedirect('/docs/')
+                return HttpResponseRedirect(reverse('home'))
             else:
                 form.add_error(None, "User doesn't exist")
     else:
@@ -54,12 +51,12 @@ def login(request):
 
 def logout(request):
     django_logout(request)
-    return HttpResponseRedirect('/login')
+    return HttpResponseRedirect(reverse('login'))
 
 
 @redirect_if_authorized
 def register(request):
-    if request.method == 'POST': 
+    if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
             pnum = form.cleaned_data['pnum']
@@ -84,9 +81,16 @@ def register(request):
                     Model = Librarian
                     is_superuser = True
                     is_staff = True
-                user = Model.objects.create_user(pnum=pnum,password=password,name=name,surname=surname,address=address, is_staff=is_staff, is_superuser=is_superuser, user_type=user_type)
+                user = Model.objects.create_user(pnum=pnum,
+                                                 password=password,
+                                                 name=name,
+                                                 surname=surname,
+                                                 address=address,
+                                                 is_staff=is_staff,
+                                                 is_superuser=is_superuser,
+                                                 user_type=user_type)
                 user.save()
-                return HttpResponseRedirect('/login/')
+                return HttpResponseRedirect(reverse('login'))
     else:
         form = RegistrationForm()
 

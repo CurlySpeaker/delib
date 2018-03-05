@@ -10,16 +10,9 @@
 <div class="inf">{{user.pnum}}</div>
 {% endblock %}
 
-{% block menu %}<!--Пользователь-->
-{% csrf_token %}
-<li class="current"><a href="">Account</a></li>
-<li><a href="../docs/">Booking</a></li>
-<li ><a href="../docs/my_books">Checking out</a></li>
-<li><a href="../logout/">Logout</a></li>
-{% endblock %}
 
 {% block head %}
-<div class="header"><p>ACCOUNT</p></div>
+<div class="header"><p>Account</p></div>
 {% endblock %}
 
 {% block content %}

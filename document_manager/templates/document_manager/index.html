@@ -4,22 +4,8 @@
 <title>Books</title>
 {% endblock%}
 
-{% block title %}<!--Пользователь-->
-{% csrf_token %}
-<div class="inf name">{{user.name}}</div>
-<div class="inf">{{user.pnum}}</div>
-{% endblock %}
-
-{% block menu %}<!--Пользователь-->
-{% csrf_token %}
-<li><a href="../information/">Account</a></li>
-<li class="current"><a href="">Booking</a></li>
-<li><a href="../docs/my_books/">Checking out</a></li>
-<li><a href="../logout/">Logout</a></li>
-{% endblock %}
-
 {% block head %}
-<div class="header"><p>BOOKING</p></div>
+<div class="header"><p>Library</p></div>
 {% endblock %}
 
 {% block content %}
@@ -49,7 +35,6 @@
 </div>
 -->
 
-{% csrf_token %}
 {% for doc in docs %}
 <div class="row book">
   <div class="col-md-12">

@@ -1,7 +1,7 @@
 {% extends "document_manager/main.html" %}
 
 {% block tit%}
-<title>Renew</title>
+<title>My books</title>
 {% endblock%}
 
 {% block title %}<!--Пользователь-->
@@ -10,17 +10,9 @@
 <div class="inf">{{user.pnum}}</div>
 {% endblock %}
 
-{% block menu %}<!--Пользователь-->
-{% csrf_token %}
-<li><a href="../information/">Account</a></li>
-<li><a href="../docs/">Booking</a></li>
-<li class="current" ><a href="">Checking out</a></li>
-<li><a href="../logout/">Logout</a></li>
-{% endblock %}
-
 
 {% block head %}
-<div class="header"><p>CHECKING OUT</p></div>
+<div class="header"><p>My Books</p></div>
 {% endblock %}
 
 

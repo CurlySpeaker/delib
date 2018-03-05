@@ -47,7 +47,7 @@ class User(AbstractBaseUser):
     is_active = True
 
     @classmethod
-    def create(cls,**kwargs):
+    def create(cls, **kwargs):
         user = cls(**kwargs)
         return user
 
@@ -69,7 +69,6 @@ class User(AbstractBaseUser):
 
     def get_short_name(self):
         return self.name
-
 
 
 class Patron(User):
@@ -95,4 +94,3 @@ class Librarian(User):
 
     def modify_user(self, user, **kwargs):
         user.update(**kwargs)
-

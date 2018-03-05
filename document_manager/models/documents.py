@@ -32,8 +32,11 @@ class Document(PolymorphicModel):
     def available_copies(self):
         return self.copies.filter(status='a')
 
+    def have_copy(self, user):
+        return self.copies.filter(loaner=user).exists()
+
     def check_out(self, user):
-        if len(self.copies.filter(loaner=user)) > 0:
+        if self.have_copy(user):
             return False
         copies = self.available_copies
         if len(copies) > 0:
@@ -57,7 +60,7 @@ class Document(PolymorphicModel):
             self.delete()
 
     def return_doc(self, user):
-        if len(self.copies.filter(loaner=user)) <= 0:
+        if not self.have_copy(user):
             return False
         copy = self.copies.filter(loaner=user)[0]
         return copy.return_copy()

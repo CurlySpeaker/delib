@@ -3,23 +3,8 @@
 {% block tit%}
 {% endblock%}
 
-{% block title %}<!--Пользователь-->
-{% csrf_token %}
-<div class="inf name">{{user.name}}</div>
-<div class="inf">{{user.pnum}}</div>
-{% endblock %}
-
-{% block menu %}<!--Пользователь-->
-{% csrf_token %}
-<li class="current"><a href="../information/">Account</a></li>
-<li><a href="../docs/">Booking</a></li>
-<li><a href="../docs/my_books/">Checking out</a></li>
-<li><a href="../logout/">Logout</a></li>
-{% endblock %}
-
-
 {% block head %}
-<div class="header"><p>CHECKING OUT</p></div>
+<div class="header"><p>My Books</p></div>
 {% endblock %}
 
 

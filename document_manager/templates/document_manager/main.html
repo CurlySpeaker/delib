@@ -1,51 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    {% load staticfiles %}
-    {% block tit%}
-    {% endblock%}
-    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}" type="text/css">
-    <link rel="stylesheet" href="{% static 'css/st.css' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  {% load staticfiles %}
+  {% block tit%}
+  {% endblock%}
+  <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}" type="text/css">
+  <link rel="stylesheet" href="{% static 'css/st.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-<div class="win"></div>
-<div class="container">
+  <div class="win"></div>
+  <div class="container">
     <div class="row">
-        <div class="col-md-3">
-            <div class="menu">
-                <div class="main_information">
-                    <p class="im"><img class="user" src="{% static 'img/user.png'%}"></p>
-                    <div class="information">
-
-                        {% block title %}
-                        {% endblock %}
-
-                    </div>
-                </div>
-                <ul>
-                    {% block menu %}
-                    {% endblock %}
-                </ul>
+      <div class="col-md-3">
+        <div class="menu">
+          <div class="main_information">
+            <p class="im"><img class="user" src="{% static 'img/user.png'%}"></p>
+            <div class="information">
+              {% block title %}
+              <div class="inf name">{{user.name}}</div>
+              <div class="inf">{{user.pnum}}</div>
+              {% endblock %}
             </div>
+          </div>
+          <ul>
+            {% block menu %}
+            {% url 'account' as url_account %}
+            {% url 'home' as url_home %}
+            {% url 'my_books' as url_my_books %}
+            {% url 'logout' as url_logout %}
+            <li {% if request.get_full_path == url_account %}class="current"{% endif %}>
+              <a href="{{url_account}}">Account</a>
+            </li>
+            <li {% if request.get_full_path == url_home %}class="current"{% endif %}>
+              <a href="{{url_home}}">Library</a>
+            </li>
+            <li {% if request.get_full_path == url_my_books %}class="current"{% endif %}>
+              <a href="{{url_my_books}}">My Books</a>
+            </li>
+            <li {% if request.get_full_path == url_logout %}class="current"{% endif %}>
+              <a href="{{url_logout}}">Logout</a>
+            </li>
+            {% endblock %}
+          </ul>
         </div>
-
-
-        <div class="col-md-9">
-          {% block head %}
-          {% endblock %}
-            <div class="container">
-                <div class="row">
-                    {% block content %}
-                    {% endblock %}
-                </div>
-            </div>
+      </div>
+      <div class="col-md-9">
+        {% block head %}
+        {% endblock %}
+        <div class="container">
+          <div class="row">
+            {% block content %}
+            {% endblock %}
+          </div>
         </div>
+      </div>
     </div>
-
-</div>
+  </div>
 </body>
 </html>
