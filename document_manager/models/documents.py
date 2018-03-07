@@ -1,5 +1,7 @@
 from user_manager.models import *
+from user_manager.functions import get_real_user
 from datetime import date
+import datetime
 
 from django.db import models
 from django.utils import timezone
@@ -24,6 +26,9 @@ class Document(PolymorphicModel):
     class Meta:
         ordering = ['title']
 
+    '''
+    cheking out system
+    '''
     @property
     def number_of_copies(self):
         return self.copies.all().count()
@@ -47,9 +52,13 @@ class Document(PolymorphicModel):
     def check_out_period(self, user):
         pass
 
+    '''
+    doc add/delete/modfy
+    '''
     @classmethod
     def add_doc(cls, user, **kwargs):
-        cls.objects.create(**kwargs)
+        if isinstance(user, Librarian):
+            cls.objects.create(**kwargs)
 
     def modify_doc(self, user):
         if isinstance(user, Librarian):
@@ -59,6 +68,20 @@ class Document(PolymorphicModel):
         if isinstance(user, Librarian):
             self.delete()
 
+    def add_copy(self, user, ammount=1, **kwargs):
+        if isinstance(user, Librarian):
+            for i in range(ammount):
+                Copy.objects.create(document=self, **kwargs)
+
+    def remove_copy(self, user, ammount=1):
+        if isinstance(user, Librarian):
+            for i in range(ammount):
+                try:
+                    Copy.objects.filter(document=self)[0].delete()
+                except:
+                    return False
+
+    # return doc
     def return_doc(self, user):
         if not self.have_copy(user):
             return False
@@ -116,7 +139,9 @@ class JournalArticle(models.Model):
 
 # Audio/Video
 class Media(Document):
-    pass
+
+    def check_out_period(self,user):
+        return 14
 
 
 '''
@@ -157,6 +182,10 @@ class Copy(models.Model):
 
     def is_available(self):
         return self.status == 'a'
+
+    def checked_due(self):
+        return (self.booking_time +
+                datetime.timedelta(days=self.document.check_out_period(get_real_user(self.loaner))))
 
     def is_overdue(self):
         if (date.today() - self.booking_time()).day() \

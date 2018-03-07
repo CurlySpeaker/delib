@@ -34,7 +34,7 @@
         </div>
         <!-- ссылка на renew-->
         <a href="" class="choose_button">Renew</a>
-        <a href="../return_doc/{{doc.id}}" class="choose_button">Return</a>
+        <a href="{% url 'return_doc' id=doc.id %}" class="choose_button">Return</a>
     </div>
 </div>
 {% endfor %}

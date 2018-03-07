@@ -86,8 +86,8 @@ class Student(Patron):
 class Librarian(User):
 
     @classmethod
-    def add_user(cls, **kwargs):
-        cls.objects.create_user(**kwargs)
+    def add_user(cls, Type, **kwargs):
+        Type.objects.create_user(**kwargs)
 
     def delete_user(self, user):
         user.delete()

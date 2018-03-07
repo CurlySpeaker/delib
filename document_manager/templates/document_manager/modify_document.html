@@ -1,11 +1,9 @@
 {% extends "document_manager/forms.html" %}
-
 {% block tit%}
-<title>Modify patron</title>
+<title>Modify document</title>
 {% endblock%}
-
 {% block forms %}
-<h2>Add document</h2>
+<h2>Modify document</h2>
 {% csrf_token %}
 {{ form }}
 <input class="submit" type="submit" value="modify"></input>
