@@ -88,6 +88,20 @@ class Document(PolymorphicModel):
         copy = self.copies.filter(loaner=user)[0]
         return copy.return_copy()
 
+    # renew
+    def renew_doc(self, user):
+        if not self.have_copy(user):
+            return False
+        copy = self.copies.filter(loaner=user)[0]
+        return copy.renew_copy(user)
+
+    # get fines
+    def get_fine(self, user):
+        if not self.have_copy(user):
+            return False
+        copy = self.copies.filter(loaner=user)[0]
+        return copy.get_fine()
+
     def __str__(self):
         return '{0}'.format(self.title)
 
@@ -98,9 +112,12 @@ class Book(Document):
     year = models.DateField()
     is_bestseller = models.BooleanField(default=False)
 
+
     def check_out_period(self, user):
         if isinstance(user, Faculty):
             return 28
+        elif isinstance(user, VisitingProfessor):
+            return 7
         elif self.is_bestseller:
             return 14
         else:
@@ -141,7 +158,9 @@ class JournalArticle(models.Model):
 class Media(Document):
 
     def check_out_period(self,user):
-        return 14
+    if isinstance(user, VisitingProfessor):
+        return 7
+    return 14
 
 
 '''
@@ -193,9 +212,27 @@ class Copy(models.Model):
             return True
         return False
 
+    def renew_copy(self, user):
+        if isinstance(user, VisitingProfessor) or self.status == 'c':
+            self.status = 'r'
+            self.booking_time = data.today()
+            self.save()
+            return True
+        else:
+            return False
+
     def return_copy(self):
         self.status = 'a'
         self.booking_time = None
         self.loaner = None
         self.save()
         return True
+
+    def get_fine(self):
+        if not is_overdue(self):
+            return 0
+        else:
+            fine = 100 * ((date.today() - self.booking_time()).day() -
+                       self.document.check_out_period(self.loaner))
+            return fine if fine < self.document.price else self.document.price
+

@@ -82,6 +82,8 @@ class Faculty(Patron):
 class Student(Patron):
     pass
 
+class VisitingProfessor(Patron):
+    pass
 
 class Librarian(User):
 
