@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'document_manager',
     'user_manager',
     'authentication',
+    'delib',
 
     'polymorphic',
 ]

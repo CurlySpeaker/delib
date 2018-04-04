@@ -578,7 +578,7 @@ class TestCase3(TestCase):
         self.d3.check_out(self.p1)
         self.d3.check_out(self.s)
         self.d3.check_out(self.v)
-        print(self.d3.waiting_list.all())
+        print(self.d3.get_waiting_list())
 
     def test6(self):
         self.d3.check_out(self.p1)
@@ -586,24 +586,30 @@ class TestCase3(TestCase):
         self.d3.check_out(self.s)
         self.d3.check_out(self.v)
         self.d3.check_out(self.p3)
-        print(self.d3.get_waiting_list(self.librarian))
+        print(self.d3.get_waiting_list())
 
     def test7(self):
         self.test6()
         self.d3.outstanding(self.librarian)
-        self.assertEqual(len(self.d3.get_waiting_list(self.librarian)),0)
+        print(self.p1.messages.all())
+        print(self.p2.messages.all())
+        print(self.s.messages.all())
+        print(self.v.messages.all())
+        print(self.p3.messages.all())
+        self.assertEqual(len(self.d3.get_waiting_list()),0)
 
     def test8(self):
         self.test6()
         self.d3.return_doc(self.p2)
+        print(self.s.messages.all())
         print(self.get_info(self.p2))
-        print(self.d3.get_waiting_list(self.librarian))
+        print(self.d3.get_waiting_list())
 
     def test9(self):
         self.test6()
         self.d3.renew_doc(self.p1)
         print(self.get_info(self.p1))
-        print(self.d3.get_waiting_list(self.librarian))
+        print(self.d3.get_waiting_list())
 
     def test10(self):
         self.d1.check_out(self.p1)

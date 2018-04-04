@@ -74,7 +74,14 @@ class Document(PolymorphicModel):
     def outstanding(self,user, make_outstanding = True):
         if isinstance(user, Librarian):
             self.is_outstanding = make_outstanding
+            if not make_outstanding:
+                return True
+            for user in self.get_waiting_list():
+                Message.send_message(user=user, notification='unavailable', document=self)
             self.waiting_list.clear()
+            users = [i.loaner for i in self.copies.all() if i.loaner != None ]
+            for user in users:
+                Message.send_message(user=user, notification='return', document=self)
             self.save()
 
     def add_copy(self, user, ammount=1, **kwargs):
@@ -90,9 +97,7 @@ class Document(PolymorphicModel):
                 except:
                     return False
 
-    def get_waiting_list(self, user):
-        if not isinstance(user, Librarian):
-            return False
+    def get_waiting_list(self):
         waiting = []
         for i in ['stu','fac','vp']:
             for j in self.waiting_list.all():
@@ -106,6 +111,10 @@ class Document(PolymorphicModel):
         if not self.have_copy(user):
             return False
         copy = self.copies.filter(loaner=user)[0]
+        waiting_list = self.get_waiting_list()
+        if len(waiting_list) > 0:
+            Message.send_message(user=waiting_list[0], notification='available',
+                                 document=self)
         return copy.return_copy()
 
     # renew
@@ -243,7 +252,7 @@ class Copy(models.Model):
     def return_copy(self):
         self.status = 'a'
         self.booking_time = None
-        self.loaner = Non
+        self.loaner = None
         self.save()
         return True
 

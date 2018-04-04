@@ -12,7 +12,7 @@ class RegistrationForm(forms.Form):
     USER_TYPES = (
         ('student', 'Student'),
         ('faculty', 'Faculty'),
-        ('librarian', 'Librarian')
+        ('librarian', 'Librarian'),
         ('vp', 'Visiting Professor')
     )
 
