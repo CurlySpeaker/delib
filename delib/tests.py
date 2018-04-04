@@ -373,7 +373,255 @@ class TestCase2(TestCase):
                copies2})
 
 
+class TestCase3(TestCase):
+
+    def setUp(self):
+        self.librarian = Librarian.objects.create_user(
+            pnum='0000000000', password='kek1', user_type='lib',
+            is_superuser=True, is_staff=True)
+
+        authors=[Author.objects.create(name='Thomas H. Cormen'),
+                 Author.objects.create(name='Charles E. Leiserson'),
+                 Author.objects.create(name='Ronald L. Rivest'),
+                 Author.objects.create(name='Clifford Stein')
+                 ]
+        self.d1 = Book.objects.create(
+            title='Introduction to Algorithms',
+            publisher='MIT press',
+            year=datetime.date(2009, 10, 10),
+            edition='Third edition',
+            price=5000,
+        )
+        self.d1.authors.set(authors)
+
+        authors=[Author.objects.create(name='Erich Gamma'),
+                 Author.objects.create(name='Ralph Johnson'),
+                 Author.objects.create(name='John Vlisidos'),
+                 Author.objects.create(name='Richard Helm')
+                 ]
+        self.d2 = Book.objects.create(
+            title='Design Patterns: Elements of '
+            'Reusable Object-Oriented Software',
+            publisher='Addison-Wesley Professional',
+            year=datetime.date(2003, 10, 10),
+            edition="First edition",
+            price=1700,
+            is_bestseller=True,
+        )
+        self.d2.authors.set(authors)
+
+        author = [Author.objects.create(name='Tony Huare')]
+        self.d3 = Book.objects.create(title='Null References: '
+                                   'The Billion Dollar Mistake',
+                                  publisher=' ',
+                                  year=datetime.date(2003, 10, 10),
+                                  edition=" ",
+                                  price=700,
+        )
+        self.d3.authors.set(author)
+
+        self.d1.add_copy(self.librarian, ammount=3)
+        self.d2.add_copy(self.librarian, ammount=3)
+        self.d3.add_copy(self.librarian, ammount=2)
+        self.librarian.add_user(Type=Faculty,
+                           user_type='fac',
+                           name='Sergey',
+                           surname='Afonso',
+                           address='Via Margutta, 3',
+                           pnum='30001',
+                           password='innopolis1')
+        self.librarian.add_user(Type=Faculty,
+                           user_type='fac',
+                           name='Nadia',
+                           surname='Teixeira',
+                           address='Via Sacra, 13',
+                           pnum='30002',
+                           password='innopolis1')
+        self.librarian.add_user(Type=Faculty,
+                           user_type='fac',
+                           name='Elvira',
+                           surname='Espindola',
+                           address='Via del Corso, 22',
+                           pnum='30003',
+                           password='innopolis1')
+        self.librarian.add_user(Type=Student,
+                           user_type='stu',
+                           name='Andrey',
+                           surname='Velo',
+                           address='Avenida Mazatlan 250',
+                           pnum='30004',
+                           password='innopolis1')
+        self.librarian.add_user(Type=VisitingProfessor,
+                           user_type='vp',
+                           name='Veronika',
+                           surname='Rama',
+                           address='Street Atocha,27',
+                           pnum='30005',
+                           password='innopolis1')
+
+        self.p1 = get_real_user(User.objects.filter(pnum="30001").get())
+        self.p2 = get_real_user(User.objects.filter(pnum="30002").get())
+        self.p3 = get_real_user(User.objects.filter(pnum="30003").get())
+        self.s = get_real_user(User.objects.filter(pnum="30004").get())
+        self.v = get_real_user(User.objects.filter(pnum="30005").get())
 
 
+    def get_info(self,user):
+        copies = Copy.objects.filter(loaner=user)
+        docs = {copy.document: [copy.get_overdue(), copy.get_fine(),
+                                copy.checked_due()] for copy in copies}
+        return{
+            #'name': user.get_full_name(),
+            #'adress': user.address,
+            'pnum': user.pnum,
+            #'card_id': user.pnum,
+            'type': user.user_type,
+            'docs': docs,
+        }
 
+    def test1(self):
+        self.d1.check_out(self.p1)
+        c1 = Copy.objects.filter(loaner=self.p1,document=self.d1).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=7)
+        c1.save()
+        self.d2.check_out(self.p1)
+        c1 = Copy.objects.filter(loaner=self.p1,document=self.d2).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=7)
+        c1.save()
+        print(self.get_info(self.p1))
+
+    def test2(self):
+        self.d1.check_out(self.p1)
+        c1 = Copy.objects.filter(loaner=self.p1,document=self.d1).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=7)
+        c1.save()
+        self.d2.check_out(self.p1)
+        c1 = Copy.objects.filter(loaner=self.p1,document=self.d2).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=7)
+        c1.save()
+
+        self.d1.check_out(self.s)
+        c1 = Copy.objects.filter(loaner=self.s,document=self.d1).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=7)
+        c1.save()
+        self.d2.check_out(self.s)
+        c1 = Copy.objects.filter(loaner=self.s,document=self.d2).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=7)
+        c1.save()
+
+        self.d1.check_out(self.v)
+        c1 = Copy.objects.filter(loaner=self.v,document=self.d1).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=7)
+        c1.save()
+        self.d2.check_out(self.v)
+        c1 = Copy.objects.filter(loaner=self.v,document=self.d2).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=7)
+        c1.save()
+
+        print(self.get_info(self.p1))
+        print(self.get_info(self.s))
+        print(self.get_info(self.v))
+
+    def test3(self):
+        self.d1.check_out(self.p1)
+        c1 = Copy.objects.filter(loaner=self.p1,document=self.d1).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=29)
+        c1.save()
+
+        self.d2.check_out(self.s)
+        c1 = Copy.objects.filter(loaner=self.s,document=self.d2).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=29)
+        c1.save()
+
+        self.d2.check_out(self.v)
+        c1 = Copy.objects.filter(loaner=self.v,document=self.d2).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=29)
+        c1.save()
+
+        self.d1.renew_doc(self.p1)
+        self.d2.renew_doc(self.s)
+        self.d2.renew_doc(self.v)
+
+        print(self.get_info(self.p1))
+        print(self.get_info(self.s))
+        print(self.get_info(self.v))
+
+    def test4(self):
+        self.d1.check_out(self.p1)
+        c1 = Copy.objects.filter(loaner=self.p1,document=self.d1).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=29)
+        c1.save()
+
+        self.d2.check_out(self.s)
+        c1 = Copy.objects.filter(loaner=self.s,document=self.d2).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=29)
+        c1.save()
+
+        self.d2.check_out(self.v)
+        c1 = Copy.objects.filter(loaner=self.v,document=self.d2).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=29)
+        c1.save()
+
+        self.d2.outstanding(self.librarian)
+
+        self.d1.renew_doc(self.p1)
+        self.d2.renew_doc(self.s)
+        self.d2.renew_doc(self.v)
+
+        print(self.get_info(self.p1))
+        print(self.get_info(self.s))
+        print(self.get_info(self.v))
+
+    def test5(self):
+        self.d3.check_out(self.p1)
+        self.d3.check_out(self.s)
+        self.d3.check_out(self.v)
+        print(self.d3.waiting_list.all())
+
+    def test6(self):
+        self.d3.check_out(self.p1)
+        self.d3.check_out(self.p2)
+        self.d3.check_out(self.s)
+        self.d3.check_out(self.v)
+        self.d3.check_out(self.p3)
+        print(self.d3.get_waiting_list(self.librarian))
+
+    def test7(self):
+        self.test6()
+        self.d3.outstanding(self.librarian)
+        self.assertEqual(len(self.d3.get_waiting_list(self.librarian)),0)
+
+    def test8(self):
+        self.test6()
+        self.d3.return_doc(self.p2)
+        print(self.get_info(self.p2))
+        print(self.d3.get_waiting_list(self.librarian))
+
+    def test9(self):
+        self.test6()
+        self.d3.renew_doc(self.p1)
+        print(self.get_info(self.p1))
+        print(self.d3.get_waiting_list(self.librarian))
+
+    def test10(self):
+        self.d1.check_out(self.p1)
+        c1 = Copy.objects.filter(loaner=self.p1,document=self.d1).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=26)
+        c1.save()
+        self.d1.renew_doc(self.p1)
+        c1 = Copy.objects.filter(loaner=self.p1,document=self.d1).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=29)
+        c1.save()
+
+        self.d1.check_out(self.v)
+        c1 = Copy.objects.filter(loaner=self.v,document=self.d1).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=26)
+        c1.save()
+        self.d1.renew_doc(self.v)
+        c1 = Copy.objects.filter(loaner=self.v,document=self.d1).get()
+        c1.booking_time=datetime.date(year=2018,month=3,day=29)
+        c1.save()
+
+        print(self.get_info(self.p1))
+        print(self.get_info(self.v))
 

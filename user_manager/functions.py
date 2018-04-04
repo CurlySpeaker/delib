@@ -1,4 +1,4 @@
-from .models import Faculty, Librarian, Student
+from .models import Faculty, Librarian, Student, VisitingProfessor
 
 
 def get_real_user(user):
@@ -6,6 +6,8 @@ def get_real_user(user):
         Model = Faculty
     elif user.user_type == 'stu':
         Model = Student
+    elif user.user_type == 'vp':
+        Model = VisitingProfessor
     else:
         Model = Librarian
     return Model.objects.get(pk=user.id)

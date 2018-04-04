@@ -22,6 +22,8 @@ class Document(PolymorphicModel):
     authors = models.ManyToManyField(Author)
     keywords = models.ManyToManyField(Keyword)
     price = models.DecimalField(decimal_places=2, max_digits=6)
+    is_outstanding = models.BooleanField(default=False)
+    waiting_list = models.ManyToManyField(User, blank=True)
 
     class Meta:
         ordering = ['title']
@@ -46,8 +48,10 @@ class Document(PolymorphicModel):
         copies = self.available_copies
         if len(copies) > 0:
             return copies[0].check_out(user)
-        else:
+        elif user in self.waiting_list.all():
             return False
+        self.waiting_list.add(user)
+        self.save()
 
     def check_out_period(self, user):
         pass
@@ -68,6 +72,12 @@ class Document(PolymorphicModel):
         if isinstance(user, Librarian):
             self.delete()
 
+    def outstanding(self,user, make_outstanding = True):
+        if isinstance(user, Librarian):
+            self.is_outstanding = make_outstanding
+            self.waiting_list.clear()
+            self.save()
+
     def add_copy(self, user, ammount=1, **kwargs):
         if isinstance(user, Librarian):
             for i in range(ammount):
@@ -81,6 +91,18 @@ class Document(PolymorphicModel):
                 except:
                     return False
 
+    def get_waiting_list(self, user):
+        if not isinstance(user, Librarian):
+            return False
+        waiting = []
+        people = [get_real_user(i) for i in self.waiting_list.all()]
+        for i in ['stu','fac','vp']:
+            for j in people:
+                if j.user_type == i:
+                    waiting.append(j)
+        return waiting
+
+
     # return doc
     def return_doc(self, user):
         if not self.have_copy(user):
@@ -92,8 +114,10 @@ class Document(PolymorphicModel):
     def renew_doc(self, user):
         if not self.have_copy(user):
             return False
+        if self.is_outstanding:
+            return False
         copy = self.copies.filter(loaner=user)[0]
-        return copy.renew_copy(user)
+        return copy.renew_copy(get_real_user(user))
 
     # get fines
     def get_fine(self, user):
@@ -158,9 +182,9 @@ class JournalArticle(models.Model):
 class Media(Document):
 
     def check_out_period(self,user):
-    if isinstance(user, VisitingProfessor):
-        return 7
-    return 14
+        if isinstance(user, VisitingProfessor):
+            return 7
+        return 14
 
 
 '''
@@ -207,15 +231,12 @@ class Copy(models.Model):
                 datetime.timedelta(days=self.document.check_out_period(get_real_user(self.loaner))))
 
     def is_overdue(self):
-        if (date.today() - self.booking_time()).day() \
-           > self.document.check_out_period(self.loaner):
-            return True
-        return False
+        return self.get_overdue() > 0
 
     def renew_copy(self, user):
         if isinstance(user, VisitingProfessor) or self.status == 'c':
             self.status = 'r'
-            self.booking_time = data.today()
+            self.booking_time = date.today()
             self.save()
             return True
         else:
@@ -228,11 +249,17 @@ class Copy(models.Model):
         self.save()
         return True
 
+    def get_overdue(self):
+        overdue = (date.today() - self.booking_time).days - \
+        self.document.check_out_period(get_real_user(self.loaner))
+        return overdue if overdue > 0 else 0
+
     def get_fine(self):
-        if not is_overdue(self):
+        if not self.is_overdue():
             return 0
         else:
-            fine = 100 * ((date.today() - self.booking_time()).day() -
-                       self.document.check_out_period(self.loaner))
-            return fine if fine < self.document.price else self.document.price
+            fine = 100.00 * self.get_overdue()
+            return fine if fine < self.document.price else float(self.document.price)
+
+
 

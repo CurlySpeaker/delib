@@ -1,5 +1,6 @@
 ROLES = (
     ('fac', 'faculty'),
     ('stu', 'student'),
-    ('lib', 'librarian')
+    ('lib', 'librarian'),
+    ('vp', 'visiting professor')
     )
