@@ -15,9 +15,12 @@ from .forms import (
     RegistrationForm,
 )
 
-from user_manager.models import User, Faculty, Student, Librarian
-from user_manager.functions import get_real_user
-
+from user_manager.models import (
+    User,
+    Faculty,
+    Student,
+    Librarian,
+)
 
 def redirect_if_authorized(function):
     def wrapper(request, *args, **kwargs):
@@ -38,7 +41,6 @@ def login(request):
                 password=form.cleaned_data['password']
             )
             if user is not None:
-                user = get_real_user(user)
                 django_login(request, user)
                 return HttpResponseRedirect(reverse('home'))
             else:
@@ -76,6 +78,9 @@ def register(request):
                 elif user_type == 'faculty':
                     Model = Faculty
                     user_type = 'fac'
+                elif user_type == 'vp':
+                    Model = VisitingProfessor
+                    user_type = 'vp'
                 else:
                     user_type = 'lib'
                     Model = Librarian

@@ -13,6 +13,7 @@ class RegistrationForm(forms.Form):
         ('student', 'Student'),
         ('faculty', 'Faculty'),
         ('librarian', 'Librarian')
+        ('vp', 'Visiting Professor')
     )
 
     name = forms.CharField(label="Name", required=True)
