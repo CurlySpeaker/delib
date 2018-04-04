@@ -73,12 +73,23 @@ class User(PolymorphicModel, AbstractBaseUser):
 
 
 class Patron(User):
-    abstract = True
+    class Meta:
+        abstract = True
 
 
 class Faculty(Patron):
+    class Meta:
+        abstract = True
+
+
+class Instructor(Faculty):
     pass
 
+class TA(Faculty):
+    pass
+
+class Professor(Faculty):
+    pass
 
 class Student(Patron):
     pass

@@ -2,5 +2,8 @@ ROLES = (
     ('fac', 'faculty'),
     ('stu', 'student'),
     ('lib', 'librarian'),
-    ('vp', 'visiting professor')
+    ('vp', 'visiting professor'),
+    ('ins', 'instructor'),
+    ('ta',  'ta'),
+    ('prof', 'professor')
     )

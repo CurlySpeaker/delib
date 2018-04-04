@@ -45,6 +45,8 @@ class Document(PolymorphicModel):
         if self.have_copy(user):
             return False
         copies = self.available_copies
+        if self.is_outstanding:
+            return False
         if len(copies) > 0:
             return copies[0].check_out(user)
         elif user in self.waiting_list.all():
@@ -82,6 +84,10 @@ class Document(PolymorphicModel):
             users = [i.loaner for i in self.copies.all() if i.loaner != None ]
             for user in users:
                 Message.send_message(user=user, notification='return', document=self)
+            for copy in self.copies.all():
+                if copy.status == 'c' or copy.status == 'r':
+                    copy.booking_time = date.today() - datetime.timedelta(days=self.check_out_period(copy.loaner))
+                    copy.save()
             self.save()
 
     def add_copy(self, user, ammount=1, **kwargs):
@@ -99,7 +105,7 @@ class Document(PolymorphicModel):
 
     def get_waiting_list(self):
         waiting = []
-        for i in ['stu','fac','vp']:
+        for i in ['stu','ins','ta','vp','prof']:
             for j in self.waiting_list.all():
                 if j.user_type == i:
                     waiting.append(j)

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
 
-from .models.user import User, Faculty, Student, Librarian
+from .models.user import User, Student, Librarian, VisitingProfessor, Professor, TA, Instructor
 
-admin.site.register([User,Faculty,Student, Librarian])
+admin.site.register([User, Student, Librarian, VisitingProfessor, Professor, TA, Instructor])
