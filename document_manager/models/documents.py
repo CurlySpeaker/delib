@@ -1,5 +1,4 @@
 from user_manager.models import *
-from user_manager.functions import get_real_user
 from datetime import date
 import datetime
 
@@ -95,9 +94,8 @@ class Document(PolymorphicModel):
         if not isinstance(user, Librarian):
             return False
         waiting = []
-        people = [get_real_user(i) for i in self.waiting_list.all()]
         for i in ['stu','fac','vp']:
-            for j in people:
+            for j in self.waiting_list.all():
                 if j.user_type == i:
                     waiting.append(j)
         return waiting
@@ -117,7 +115,7 @@ class Document(PolymorphicModel):
         if self.is_outstanding:
             return False
         copy = self.copies.filter(loaner=user)[0]
-        return copy.renew_copy(get_real_user(user))
+        return copy.renew_copy(user)
 
     # get fines
     def get_fine(self, user):
@@ -228,7 +226,7 @@ class Copy(models.Model):
 
     def checked_due(self):
         return (self.booking_time +
-                datetime.timedelta(days=self.document.check_out_period(get_real_user(self.loaner))))
+                datetime.timedelta(days=self.document.check_out_period(self.loaner)))
 
     def is_overdue(self):
         return self.get_overdue() > 0
@@ -245,13 +243,13 @@ class Copy(models.Model):
     def return_copy(self):
         self.status = 'a'
         self.booking_time = None
-        self.loaner = None
+        self.loaner = Non
         self.save()
         return True
 
     def get_overdue(self):
         overdue = (date.today() - self.booking_time).days - \
-        self.document.check_out_period(get_real_user(self.loaner))
+        self.document.check_out_period(self.loaner)
         return overdue if overdue > 0 else 0
 
     def get_fine(self):

@@ -1,12 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from polymorphic.models import PolymorphicModel, PolymorphicManager
 
 from delib.hashes import sha256
 
 from .roles import ROLES
 
 
-class UserManager(BaseUserManager):
+class UserManager(PolymorphicManager, BaseUserManager):
     use_in_migrations = True
 
     def create_user(self, pnum, password, **required_args):
@@ -26,7 +27,7 @@ class UserManager(BaseUserManager):
         return user
 
 
-class User(AbstractBaseUser):
+class User(PolymorphicModel, AbstractBaseUser):
 
     name = models.CharField(max_length=30)
     surname = models.CharField(max_length=30)

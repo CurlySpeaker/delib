@@ -2,7 +2,6 @@ from django.test import TestCase
 import datetime
 from user_manager.models import *
 from document_manager.models import *
-from user_manager.functions import get_real_user
 
 
 class TestCase1(TestCase):
@@ -459,11 +458,14 @@ class TestCase3(TestCase):
                            pnum='30005',
                            password='innopolis1')
 
-        self.p1 = get_real_user(User.objects.filter(pnum="30001").get())
-        self.p2 = get_real_user(User.objects.filter(pnum="30002").get())
-        self.p3 = get_real_user(User.objects.filter(pnum="30003").get())
-        self.s = get_real_user(User.objects.filter(pnum="30004").get())
-        self.v = get_real_user(User.objects.filter(pnum="30005").get())
+        self.p1 = User.objects.filter(pnum="30001").get()
+        self.p2 = User.objects.filter(pnum="30002").get()
+        self.p3 = User.objects.filter(pnum="30003").get()
+        self.s = User.objects.filter(pnum="30004").get()
+        self.v = User.objects.filter(pnum="30005").get()
+
+    def test0(self):
+        print(User.objects.all())
 
 
     def get_info(self,user):
