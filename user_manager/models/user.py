@@ -1,4 +1,6 @@
 from django.db import models
+from delib.log import Log
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from polymorphic.models import PolymorphicModel, PolymorphicManager
 
@@ -72,7 +74,6 @@ class User(PolymorphicModel, AbstractBaseUser):
         return self.name
 
 
-#Patron section
 class Patron(User):
     class Meta:
         abstract = True
@@ -86,19 +87,23 @@ class Faculty(Patron):
 class Instructor(Faculty):
     pass
 
+
 class TA(Faculty):
     pass
+
 
 class Professor(Faculty):
     pass
 
+
 class Student(Patron):
     pass
+
 
 class VisitingProfessor(Patron):
     pass
 
-#Librarian and Admin
+
 class Admin(User):
 
     def save(self, *args, **kwargs):
@@ -123,31 +128,36 @@ class Admin(User):
         if isinstance(user, Librarian):
             user.update(privilege=privilege)
 
+
 def require_previledge(level):
     def decorator(func):
         def wrapper(*args, **kwargs):
+            user = kwargs.get('user')
             if user.privilege >= level:
                 func()
             else:
-                raise ValidationError('You do not have privilege for this action')
+                raise ValidationError('Access denied')
         return wrapper
     return decorator
+
 
 class Librarian(User):
     privilege = models.PositiveIntegerField(default=1)
 
-    @classmethod
     @require_previledge(2)
-    def add_user(cls, Type, **kwargs):
+    def add_user(self, Type, **kwargs):
         if issubclass(Type, Patron):
-            Type.objects.create_user(**kwargs)
+            user = Type.objects.create_user(**kwargs)
+            Log.objects.create(text='{1} added {0}'.format(self, user))
 
     @require_previledge(3)
     def delete_user(self, user):
         if isinstance(user, Patron):
+            Log.objects.create(text='{1} deleted {0}'.format(user, self))
             user.delete()
 
     @require_previledge(1)
     def modify_user(self, user, **kwargs):
         if isinstance(user, Patron):
             user.update(**kwargs)
+            Log.objects.create(text='{1} modified {0}'.format(user, self))

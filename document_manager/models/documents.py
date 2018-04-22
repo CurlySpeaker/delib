@@ -1,12 +1,13 @@
 from user_manager.models import *
 from user_manager.functions import require_previledge
+from delib.log import Log
 from datetime import date
 import datetime
 
 from django.db import models
 from django.utils import timezone
-from polymorphic.models import PolymorphicModel
 
+from polymorphic.models import PolymorphicModel
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -48,6 +49,8 @@ class Document(PolymorphicModel):
         if self.is_outstanding:
             return False
         if len(copies) > 0:
+            Log.objects.create(text='{0} checked out \
+                               {1}'.format(user, self.title))
             return copies[0].check_out(user)
         elif user in self.waiting_list.all():
             return False
@@ -61,19 +64,22 @@ class Document(PolymorphicModel):
     @require_previledge(2)
     def add_doc(cls, user, **kwargs):
         if isinstance(user, Librarian):
-            cls.objects.create(**kwargs)
+            doc = cls.objects.create(**kwargs)
+            Log.objects.create(text='{0} created {1}'.format(user, doc))
 
-    def modify_doc(self, user):
+    def modify_doc(self, user, **kwargs):
         if isinstance(user, Librarian):
             self.update(**kwargs)
+            Log.objects.create(text='{0} modified {1}'.format(user, self))
 
     @require_previledge(3)
     def remove_doc(self, user):
         if isinstance(user, Librarian):
+            Log.objects.create(text='{0} removed {1}'.format(user, self))
             self.delete()
 
     @require_previledge(2)
-    def outstanding(self,user, make_outstanding = True):
+    def outstanding(self, user, make_outstanding = True):
         if isinstance(user, Librarian):
             self.is_outstanding = make_outstanding
             if not make_outstanding:
@@ -81,7 +87,7 @@ class Document(PolymorphicModel):
             for user in self.get_waiting_list():
                 Message.send_message(user=user, notification='unavailable', document=self)
             self.waiting_list.clear()
-            users = [i.loaner for i in self.copies.all() if i.loaner != None ]
+            users = [i.loaner for i in self.copies.all() if i.loaner is not None]
             for user in users:
                 Message.send_message(user=user, notification='return', document=self)
             for copy in self.copies.all():
@@ -89,12 +95,16 @@ class Document(PolymorphicModel):
                     copy.booking_time = date.today() - datetime.timedelta(days=self.check_out_period(copy.loaner))
                     copy.save()
             self.save()
+            Log.objects.create(text='{0} made outstanding {1}'.format(user, self))
 
     @require_previledge(2)
     def add_copy(self, user, ammount=1, **kwargs):
         if isinstance(user, Librarian):
             for i in range(ammount):
                 Copy.objects.create(document=self, **kwargs)
+            Log.objects.create(text='{0} made {2} copies of  {1}'.format(user,
+                                                                         self,
+                                                                         ammount))
 
     @require_previledge(3)
     def remove_copy(self, user, ammount=1):
@@ -104,6 +114,9 @@ class Document(PolymorphicModel):
                     Copy.objects.filter(document=self)[0].delete()
                 except:
                     return False
+                else:
+                    Log.objects.create(text='{0} deleted {2} copies of \
+                                       {1}'.format(user, self, ammount))
 
     def get_waiting_list(self):
         waiting = []
@@ -121,6 +134,7 @@ class Document(PolymorphicModel):
         if len(waiting_list) > 0:
             Message.send_message(user=waiting_list[0], notification='available',
                                  document=self)
+        Log.objects.create(text='{0} returned {1}'.format(user, self))
         return copy.return_copy()
 
     def renew_doc(self, user):
@@ -129,7 +143,10 @@ class Document(PolymorphicModel):
         if self.is_outstanding:
             return False
         copy = self.copies.filter(loaner=user)[0]
-        return copy.renew_copy(user)
+        if copy.renew_copy(user):
+            Log.objects.create(text='{0} renewed {1}'.format(user, self))
+            return True
+        return False
 
     def get_fine(self, user):
         if not self.have_copy(user):
