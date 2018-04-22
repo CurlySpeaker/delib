@@ -72,6 +72,7 @@ class User(PolymorphicModel, AbstractBaseUser):
         return self.name
 
 
+#Patron section
 class Patron(User):
     class Meta:
         abstract = True
@@ -97,14 +98,56 @@ class Student(Patron):
 class VisitingProfessor(Patron):
     pass
 
-class Librarian(User):
+#Librarian and Admin
+class Admin(User):
+
+    def save(self, *args, **kwargs):
+        if Admin.objects.exists() and not self.pk:
+            raise ValidationError('There is can be only one Admin in system')
+        return super(Admin, self).save(*args, **kwargs)
 
     @classmethod
     def add_user(cls, Type, **kwargs):
-        Type.objects.create_user(**kwargs)
+        if issubclass(Type, Librarian):
+            Type.objects.create_user(**kwargs)
 
     def delete_user(self, user):
-        user.delete()
+        if isinstance(user, Librarian):
+            user.delete()
 
     def modify_user(self, user, **kwargs):
-        user.update(**kwargs)
+        if isinstance(user, Librarian):
+            user.update(**kwargs)
+
+    def set_privilege(self, user, privilege=1):
+        if isinstance(user, Librarian):
+            user.update(privilege=privilege)
+
+def require_previledge(level):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            if user.privilege >= level:
+                func()
+            else:
+                raise ValidationError('You do not have privilege for this action')
+        return wrapper
+    return decorator
+
+class Librarian(User):
+    privilege = models.PositiveIntegerField(default=1)
+
+    @classmethod
+    @require_previledge(2)
+    def add_user(cls, Type, **kwargs):
+        if issubclass(Type, Patron):
+            Type.objects.create_user(**kwargs)
+
+    @require_previledge(3)
+    def delete_user(self, user):
+        if isinstance(user, Patron):
+            user.delete()
+
+    @require_previledge(1)
+    def modify_user(self, user, **kwargs):
+        if isinstance(user, Patron):
+            user.update(**kwargs)

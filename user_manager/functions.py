@@ -1,13 +1,13 @@
 from .models import Faculty, Librarian, Student, VisitingProfessor
 
+def require_previledge(level):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            if user.privilege >= level:
+                func()
+            else:
+                raise ValidationError('You do not have privilege for this action')
+        return wrapper
+    return decorator
 
-def get_real_user(user):
-    if user.user_type == 'fac':
-        Model = Faculty
-    elif user.user_type == 'stu':
-        Model = Student
-    elif user.user_type == 'vp':
-        Model = VisitingProfessor
-    else:
-        Model = Librarian
-    return Model.objects.get(pk=user.id)
+

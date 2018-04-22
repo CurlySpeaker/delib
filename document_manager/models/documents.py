@@ -1,4 +1,5 @@
 from user_manager.models import *
+from user_manager.functions import require_previledge
 from datetime import date
 import datetime
 
@@ -13,10 +14,12 @@ from.author import Author, Editor
 
 
 class Keyword(models.Model):
+
     word = models.CharField(max_length=20)
 
 
 class Document(PolymorphicModel):
+
     title = models.CharField(max_length=50)
     authors = models.ManyToManyField(Author)
     keywords = models.ManyToManyField(Keyword)
@@ -27,9 +30,6 @@ class Document(PolymorphicModel):
     class Meta:
         ordering = ['title']
 
-    '''
-    cheking out system
-    '''
     @property
     def number_of_copies(self):
         return self.copies.all().count()
@@ -57,10 +57,8 @@ class Document(PolymorphicModel):
     def check_out_period(self, user):
         pass
 
-    '''
-    doc add/delete/modfy
-    '''
     @classmethod
+    @require_previledge(2)
     def add_doc(cls, user, **kwargs):
         if isinstance(user, Librarian):
             cls.objects.create(**kwargs)
@@ -69,10 +67,12 @@ class Document(PolymorphicModel):
         if isinstance(user, Librarian):
             self.update(**kwargs)
 
+    @require_previledge(3)
     def remove_doc(self, user):
         if isinstance(user, Librarian):
             self.delete()
 
+    @require_previledge(2)
     def outstanding(self,user, make_outstanding = True):
         if isinstance(user, Librarian):
             self.is_outstanding = make_outstanding
@@ -90,11 +90,13 @@ class Document(PolymorphicModel):
                     copy.save()
             self.save()
 
+    @require_previledge(2)
     def add_copy(self, user, ammount=1, **kwargs):
         if isinstance(user, Librarian):
             for i in range(ammount):
                 Copy.objects.create(document=self, **kwargs)
 
+    @require_previledge(3)
     def remove_copy(self, user, ammount=1):
         if isinstance(user, Librarian):
             for i in range(ammount):
@@ -111,8 +113,6 @@ class Document(PolymorphicModel):
                     waiting.append(j)
         return waiting
 
-
-    # return doc
     def return_doc(self, user):
         if not self.have_copy(user):
             return False
@@ -123,7 +123,6 @@ class Document(PolymorphicModel):
                                  document=self)
         return copy.return_copy()
 
-    # renew
     def renew_doc(self, user):
         if not self.have_copy(user):
             return False
@@ -132,7 +131,6 @@ class Document(PolymorphicModel):
         copy = self.copies.filter(loaner=user)[0]
         return copy.renew_copy(user)
 
-    # get fines
     def get_fine(self, user):
         if not self.have_copy(user):
             return False
@@ -144,11 +142,11 @@ class Document(PolymorphicModel):
 
 
 class Book(Document):
+
     publisher = models.CharField(max_length=50)
     edition = models.CharField(max_length=2)
     year = models.DateField()
     is_bestseller = models.BooleanField(default=False)
-
 
     def check_out_period(self, user):
         if isinstance(user, Faculty):
@@ -166,10 +164,12 @@ class Reference(Book):
 
 
 class Journal(models.Model):
+
     publisher = models.CharField(max_length=50)
 
 
 class Issue (Document):
+
     journal = models.ForeignKey(
         Journal, on_delete=models.CASCADE, related_name='issues')
     editors = models.ManyToManyField(Editor)
@@ -188,10 +188,9 @@ class JournalArticle(models.Model):
     authors = models.ManyToManyField(Author)
     issue = models.ForeignKey(
         Issue, on_delete=models.CASCADE,
-        related_name='journal_articles')  # many-to-one
+        related_name='journal_articles')
 
 
-# Audio/Video
 class Media(Document):
 
     def check_out_period(self,user):
@@ -200,14 +199,8 @@ class Media(Document):
         return 14
 
 
-'''
-document - document to wich copy belongs to
-room - position of copy
-loaner - by whom checked out
-'''
-
-
 class Copy(models.Model):
+
     document = models.ForeignKey(
         Document, on_delete=models.CASCADE, related_name='copies')
     room = models.CharField(max_length=50, blank=True)
@@ -219,12 +212,10 @@ class Copy(models.Model):
         ('a', 'Available'),
         ('r', 'Renewed'),
     )
-
     status = models.CharField(
         max_length=1, choices=LOAN_STATUS,
         default='a', help_text='Book availability')
 
-    # Checking out book
     def check_out(self, user):
         if not self.is_available():
             return False
@@ -273,6 +264,4 @@ class Copy(models.Model):
         else:
             fine = 100.00 * self.get_overdue()
             return fine if fine < self.document.price else float(self.document.price)
-
-
 
