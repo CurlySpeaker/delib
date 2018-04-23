@@ -17,10 +17,15 @@ from .forms import (
 
 from user_manager.models import (
     User,
-    Faculty,
     Student,
     Librarian,
+    Instructor,
+    TA,
+    Professor,
+    VisitingProfessor,
+    Admin,
 )
+
 
 def redirect_if_authorized(function):
     def wrapper(request, *args, **kwargs):
@@ -72,20 +77,23 @@ def register(request):
             else:
                 is_superuser = False
                 is_staff = False
-                if user_type == 'student':
+
+                if user_type == 'Student':
                     Model = Student
-                    user_type = 'stu'
-                elif user_type == 'faculty':
-                    Model = Faculty
-                    user_type = 'fac'
-                elif user_type == 'vp':
+                elif user_type == 'Professor':
+                    Model = Professor
+                elif user_type == 'VisitingProfessor':
                     Model = VisitingProfessor
-                    user_type = 'vp'
-                else:
-                    user_type = 'lib'
-                    Model = Librarian
-                    is_superuser = True
+                elif user_type == 'TA':
+                    Model = TA
+                elif user_type == 'Instructor':
+                    Model = Instructor
+                elif user_type == 'Admin':
+                    Model = Admin
                     is_staff = True
+                    is_superuser = True
+                else:
+                    Model = Librarian
                 user = Model.objects.create_user(pnum=pnum,
                                                  password=password,
                                                  name=name,

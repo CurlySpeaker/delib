@@ -1,5 +1,4 @@
 from django import forms
-from django.core.exceptions import ValidationError
 
 
 class AuthorizationForm(forms.Form):
@@ -10,10 +9,13 @@ class AuthorizationForm(forms.Form):
 class RegistrationForm(forms.Form):
 
     USER_TYPES = (
-        ('student', 'Student'),
-        ('faculty', 'Faculty'),
-        ('librarian', 'Librarian'),
-        ('vp', 'Visiting Professor')
+        ('Student', 'Student'),
+        ('Professor', 'Professor'),
+        ('Instructor', 'Instructor'),
+        ('Admin', 'Admin'),
+        ('TA', 'TA'),
+        ('VisitingProfessor', 'Visiting Professor'),
+        ('Librarian', 'Librarian'),
     )
 
     name = forms.CharField(label="Name", required=True)
