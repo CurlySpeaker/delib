@@ -660,11 +660,14 @@ class TestCase4(TestCase):
 
     def test2(self):
         self.admin.add_user(
-            Librarian, pnum='0000000001', password='innopeles1', name='L1')
+            Librarian, pnum='0000000001', password='innopeles1', name='L1',
+            privilege=1)
         self.admin.add_user(
-            Librarian, pnum='0000000002', password='innopelez1', name='L2', privilege=3)
+            Librarian, pnum='0000000002', password='innopelez1', name='L2',
+            privilege=2)
         self.admin.add_user(
-            Librarian, pnum='0000000003', password='innopeliz', name='L3', privilege=3)
+            Librarian, pnum='0000000003', password='innopeliz', name='L3',
+            privilege=3)
         self.l1 = Librarian.objects.filter(pnum='0000000001').get()
         self.l2 = Librarian.objects.filter(pnum='0000000002').get()
         self.l3 = Librarian.objects.filter(pnum='0000000003').get()
@@ -934,6 +937,23 @@ class TestCase4(TestCase):
     def test12(self):
         self.test7()
         docs = search(user=self.v, keyword='Algorithms')
+        print('Found docs:')
+        for i in docs:
+            print(i)
+
+    def test13(self):
+        self.test4()
+        docs = list(set(search(user=self.v,
+                               title='Algorithms')).intersection(set(search(user=self.v,
+                                                                            title='Programming'))))
+        print('Found docs:')
+        for i in docs:
+            print(i)
+
+    def test14(self):
+        self.test4()
+        docs = list(set(search(user=self.v,
+                               title='Algorithms')).union(set(search(user=self.v,title='Programming'))))
         print('Found docs:')
         for i in docs:
             print(i)
