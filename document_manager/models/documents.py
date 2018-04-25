@@ -1,6 +1,17 @@
-from user_manager.models import *
-from user_manager.functions import require_previledge
-from delib.log import Log
+from user_manager.models import (
+    Librarian,
+    Student,
+    VisitingProfessor,
+    Professor,
+    Faculty,
+    TA,
+    Instructor,
+
+    Message,
+
+    require_previledge,
+)
+from delib.models import Log
 from datetime import date
 import datetime
 
@@ -28,9 +39,6 @@ class Document(PolymorphicModel):
     is_outstanding = models.BooleanField(default=False)
     waiting_list = models.ManyToManyField(User, blank=True)
 
-    class Meta:
-        ordering = ['title']
-
     @property
     def number_of_copies(self):
         return self.copies.all().count()
@@ -49,12 +57,12 @@ class Document(PolymorphicModel):
         if self.is_outstanding:
             return False
         if len(copies) > 0:
-            Log.objects.create(text='{0} checked out \
-                               {1}'.format(user, self.title))
+            Log.objects.create(text='{0} checked out {1}'.format(user, self.title))
             return copies[0].check_out(user)
         elif user in self.waiting_list.all():
             return False
         self.waiting_list.add(user)
+        Log.objects.create(text='{0} checked out {1}'.format(user, self.title))
         self.save()
 
     def check_out_period(self, user):
@@ -79,23 +87,29 @@ class Document(PolymorphicModel):
             self.delete()
 
     @require_previledge(2)
-    def outstanding(self, user, make_outstanding = True):
+    def outstanding(self, user, make_outstanding=True):
         if isinstance(user, Librarian):
             self.is_outstanding = make_outstanding
             if not make_outstanding:
                 return True
-            for user in self.get_waiting_list():
-                Message.send_message(user=user, notification='unavailable', document=self)
+            for use in self.get_waiting_list():
+                Message.send_message(
+                    user=use, notification='unavailable', document=self)
             self.waiting_list.clear()
-            users = [i.loaner for i in self.copies.all() if i.loaner is not None]
-            for user in users:
-                Message.send_message(user=user, notification='return', document=self)
+            Log.objects.create(text='Waiting list of {0} was cleared'.format(self))
+            users = [i.loaner for i in self.copies.all()
+                     if i.loaner is not None]
+            for use in users:
+                Message.send_message(
+                    user=use, notification='return', document=self)
             for copy in self.copies.all():
                 if copy.status == 'c' or copy.status == 'r':
-                    copy.booking_time = date.today() - datetime.timedelta(days=self.check_out_period(copy.loaner))
+                    copy.booking_time = date.today(
+                    ) - datetime.timedelta(days=self.check_out_period(copy.loaner))
                     copy.save()
             self.save()
-            Log.objects.create(text='{0} made outstanding {1}'.format(user, self))
+            Log.objects.create(
+                text='{0} made outstanding {1}'.format(user, self))
 
     @require_previledge(2)
     def add_copy(self, user, ammount=1, **kwargs):
@@ -120,9 +134,9 @@ class Document(PolymorphicModel):
 
     def get_waiting_list(self):
         waiting = []
-        for i in ['stu','ins','ta','vp','prof']:
+        for i in [Student, Instructor, TA, VisitingProfessor, Professor]:
             for j in self.waiting_list.all():
-                if j.user_type == i:
+                if isinstance(j, i):
                     waiting.append(j)
         return waiting
 
@@ -210,7 +224,7 @@ class JournalArticle(models.Model):
 
 class Media(Document):
 
-    def check_out_period(self,user):
+    def check_out_period(self, user):
         if isinstance(user, VisitingProfessor):
             return 7
         return 14
@@ -272,7 +286,7 @@ class Copy(models.Model):
 
     def get_overdue(self):
         overdue = (date.today() - self.booking_time).days - \
-        self.document.check_out_period(self.loaner)
+            self.document.check_out_period(self.loaner)
         return overdue if overdue > 0 else 0
 
     def get_fine(self):
@@ -282,3 +296,18 @@ class Copy(models.Model):
             fine = 100.00 * self.get_overdue()
             return fine if fine < self.document.price else float(self.document.price)
 
+
+def search(user, title=None, keyword=None):
+    docs = Document.objects.all()
+    if title is not None:
+        result = []
+        for i in docs:
+            if title in i.title:
+                result.append(i)
+    if keyword is not None:
+        result = []
+        for i in docs:
+            for j in i.keywords.all():
+                if keyword == j.word:
+                    result.append(i)
+    return result

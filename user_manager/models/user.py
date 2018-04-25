@@ -1,5 +1,5 @@
 from django.db import models
-from delib.log import Log
+from delib.models import Log
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from polymorphic.models import PolymorphicModel, PolymorphicManager
@@ -73,15 +73,16 @@ class User(PolymorphicModel, AbstractBaseUser):
     def get_short_name(self):
         return self.name
 
+    def __str__(self):
+        return self.get_full_name()
+
 
 class Patron(User):
-    class Meta:
-        abstract = True
+    pass
 
 
 class Faculty(Patron):
-    class Meta:
-        abstract = True
+    pass
 
 
 class Instructor(Faculty):
@@ -111,10 +112,10 @@ class Admin(User):
             raise ValidationError('There is can be only one Admin in system')
         return super(Admin, self).save(*args, **kwargs)
 
-    @classmethod
-    def add_user(cls, Type, **kwargs):
+    def add_user(self, Type, **kwargs):
         if issubclass(Type, Librarian):
-            Type.objects.create_user(**kwargs)
+            user = Type.objects.create_user(**kwargs)
+            Log.objects.create(text='{0} added {1}'.format(self, user))
 
     def delete_user(self, user):
         if isinstance(user, Librarian):
@@ -128,14 +129,18 @@ class Admin(User):
         if isinstance(user, Librarian):
             user.update(privilege=privilege)
 
+    def check_log(self):
+        return Log.objects.all()
+
 
 def require_previledge(level):
     def decorator(func):
-        def wrapper(*args, **kwargs):
-            user = kwargs.get('user')
+        def wrapper(self, *args, **kwargs):
+            user = kwargs.get('user', self)
             if user.privilege >= level:
-                func()
+                func(self, *args, **kwargs)
             else:
+                Log.objects.create(text='{0} tried {1} but Access denied'.format(user, func.__name__))
                 raise ValidationError('Access denied')
         return wrapper
     return decorator
@@ -148,7 +153,7 @@ class Librarian(User):
     def add_user(self, Type, **kwargs):
         if issubclass(Type, Patron):
             user = Type.objects.create_user(**kwargs)
-            Log.objects.create(text='{1} added {0}'.format(self, user))
+            Log.objects.create(text='{1} added {0}'.format(user, self))
 
     @require_previledge(3)
     def delete_user(self, user):
